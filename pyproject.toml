@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parsidate"
+version = "1.0.0"
+description = "Comprehensive Persian (Jalali/Solar Hijri) and Gregorian date toolkit for Python, inspired by R's lubridate"
+readme = "README.md"
+authors = [
+    {name = "Ali Sadeghi Aghili", email = "alisadeghiaghili@gmail.com"}
+]
+license = {text = "GPL-3.0-or-later"}
+keywords = [
+    "jalali", "persian", "date", "calendar", "hijri", "shamsi",
+    "gregorian", "solar-hijri", "datetime", "lubridate", "dimdate",
+    "Ali Sadeghi Aghili", "Ali Aghili", "Seyed Ali Sadeghi Aghili"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Localization",
+    "Topic :: Software Development :: Internationalization"
+]
+requires-python = ">=3.8"
+dependencies = [
+    "python-dateutil>=2.8.0",
+    "pytz>=2021.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "isort>=5.0",
+    "mypy>=1.0",
+    "flake8>=6.0",
+]
+dimdate = [
+    "pandas>=1.5.0",
+    "numpy>=1.21.0",
+]
+docs = [
+    "sphinx>=5.0",
+    "sphinx-rtd-theme>=1.0",
+    "myst-parser>=0.18",
+]
+all = [
+    "parsidate[dev,dimdate,docs]"
+]
+
+[project.urls]
+Homepage = "https://github.com/alisadeghiaghili/parsidate"
+Documentation = "https://parsidate.readthedocs.io"
+Repository = "https://github.com/alisadeghiaghili/parsidate"
+"Bug Tracker" = "https://github.com/alisadeghiaghili/parsidate/issues"
+Changelog = "https://github.com/alisadeghiaghili/parsidate/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["parsidate"]
+
+[tool.setuptools.package-data]
+parsidate = ["py.typed"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=parsidate --cov-report=html --cov-report=term"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
