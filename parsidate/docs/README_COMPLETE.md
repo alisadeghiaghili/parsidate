@@ -920,7 +920,7 @@ When you use ParsiDate, you **MUST**:
 3. Include the license: GPL-3.0-or-later
 4. Document any modifications
 
-See [ATTRIBUTION.md](ATTRIBUTION.md) for complete details and examples.
+See [ATTRIBUTION.md](../../ATTRIBUTION.md) for complete details and examples.
 
 ### What This Means
 
@@ -961,7 +961,7 @@ We thank all contributors who have helped improve ParsiDate!
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+See [CHANGELOG.md](../../CHANGELOG.md) for version history and updates.
 
 ## Roadmap
 
@@ -985,7 +985,7 @@ Have a feature request? [Open an issue](https://github.com/alisadeghiaghili/pars
 ## Getting in Touch
 
 - **Email**: alisadeghiaghili@gmail.com
-- **GitHub**: [your-username/parsidate](https://github.com/alisadeghiaghili/parsidate)
+- **GitHub**: [alisadeghiaghili/parsidate](https://github.com/alisadeghiaghili/parsidate)
 - **Issues**: [GitHub Issues](https://github.com/alisadeghiaghili/parsidate/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/alisadeghiaghili/parsidate/discussions)
 
