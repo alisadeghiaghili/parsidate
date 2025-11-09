@@ -25,12 +25,14 @@ Inspired by R's powerful [lubridate](https://lubridate.tidyverse.org) package.
 
 ## Installation
 
-```pip install parsidate```
+```bash
+pip install parsidate
+```
 
 ---
 
 ## Quick Usage
-```
+```python
 from parsidate.core import JalaliDate, GregorianDate
 from parsidate.parsers import jmd, ymd
 from parsidate.operations import add_days, diff_in_days
@@ -55,19 +57,19 @@ from parsidate.timezone import convert_timezone
 
 ## Package Structure
 
-parsidate/
-core/
-parsing/
-formatting/
-operations/
-intervals/
-timezone/
-generator/
-dimdate/
-README.md
-LICENSE
-setup.py
-py.typed
+- parsidate/
+- core/
+- parsing/
+- formatting/
+- operations/
+- intervals/
+- timezone/
+- generator/
+- dimdate/
+- README.md
+- LICENSE
+- setup.py
+- py.typed
 
 ---
 
@@ -94,7 +96,7 @@ py.typed
 
 ## Sample: DimDate Table
 
-```
+```python
 from parsidate.dimdate import generate_dim_date
 
 dim = generate_dim_date(start="1402/01/01", end="1402/01/07", calendar="jalali", include_fiscal=True)
@@ -114,7 +116,9 @@ GNU General Public License v3.0 or later (GPL-3.0-or-later)
 
 ## Testing
 
-```pytest tests/ -v --cov=parsidate```
+```bash
+pytest tests/ -v --cov=parsidate
+```
 
 
 ---
@@ -130,6 +134,6 @@ Inspired by:
 
 ## Contribution
 
-Pull requests welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+Pull requests welcome! See [CONTRIBUTING.md](/parsidate/docs/CONTRIBUTING.md)
 
 
