@@ -26,7 +26,7 @@ ParsiDate is a Python library for professional date management based on Persian 
 
 ### Example
 
-```
+```python
 jdate = JalaliDate(1402, 8, 19, 10, 45)
 gdate = GregorianDate(2024, 11, 10, 10, 45)
 ```
