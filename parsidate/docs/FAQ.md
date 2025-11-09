@@ -29,7 +29,7 @@ You need Python 3.8 or higher.
 
 Use the converters:
 
-```
+```python
 from parsidate.core.converters import jalali_to_gregorian, gregorian_to_jalali
 
 gy, gm, gd = jalali_to_gregorian(1402, 8, 19)
@@ -42,7 +42,7 @@ jy, jm, jd = gregorian_to_jalali(2024, 11, 10)
 
 ParsiDate provides several string parsers:
 
-```
+```python
 from parsidate.parsers import jmd, ymd, jdm, dmy, parse_date
 jdate = jmd("1402/08/19")
 gdate = ymd("2024-11-10")
@@ -56,7 +56,7 @@ gdate = ymd("2024-11-10")
 
 Yes, ParsiDate fully supports timezone conversion and localization with pytz-compatible zones:
 
-```
+```python
 from parsidate.timezone import get_timezone, localize_datetime
 tz = get_timezone("Asia/Tehran")
 ```
@@ -65,7 +65,7 @@ tz = get_timezone("Asia/Tehran")
 
 ### 7. How can I generate a date range?
 
-```
+```python
 from parsidate.operations import date_range
 for d in date_range(JalaliDate(1402,1,1), JalaliDate(1402,1,10)):
 print(d)
@@ -77,7 +77,7 @@ print(d)
 
 Yes. There's direct support for date dimension tables:
 
-```
+```python
 from parsidate.dimdate import generate_dim_date
 df = generate_dim_date(start="1402/01/01", end="1402/01/10", calendar="jalali")
 ```
@@ -116,4 +116,4 @@ GNU General Public License v3.0 or later.
 
 ---
 
-For more details and advanced usage, refer to the [USAGE_GUIDE.md](USAGE_GUIDE.md), [README.md](README.md), and API docs.
+For more details and advanced usage, refer to the [USAGE_GUIDE.md](USAGE_GUIDE.md), [README.md](README_COMPLETE.md), and [API](API_REFERENCE.md) docs.
