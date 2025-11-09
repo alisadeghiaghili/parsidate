@@ -12,7 +12,7 @@ Thank you for your interest in contributing to ParsiDate!
    Click the “Fork” button at the top right to create your own copy.
 
 2. **Clone your fork**
-```
+```bash
 git clone https://github.com/your-username/parsidate.git
 cd parsidate
 ```
