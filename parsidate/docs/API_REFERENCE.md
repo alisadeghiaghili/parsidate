@@ -9,7 +9,7 @@
 #### JalaliDate
 
 class JalaliDate:
-```
+```python
 def init(year, month, day, hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
 year() # Get/set year
 month() # Get/set month
@@ -52,7 +52,7 @@ jdn_to_gregorian(jdn) -> (year, month, day)
 
 ### Parsers
 
-```
+```python
 jmd(str) # Parse Jalali date string "YYYY/MM/DD"
 ymd(str) # Parse Gregorian date string "YYYY-MM-DD"
 jdm(str) # "DD-MM-YYYY" Jalali
@@ -66,7 +66,7 @@ parse_date(str) # Auto detect calendar
 
 ### Formatting
 
-```
+```python
 format_jalali_date(date, locale='fa'|'en') # Standard fa/en
 format_gregorian_date(date, locale='fa'|'en')
 format_full(date, locale='fa'|'en')
@@ -81,7 +81,7 @@ format_date_custom(date, fmt: str, locale='fa'|'en')
 
 Arithmetic
 
-```
+```python
 add_days(date, n)
 add_months(date, n)
 add_years(date, n)
@@ -90,7 +90,7 @@ add_weeks(date, n)
 
 Comparison
 
-```
+```python
 eq(a, b), ne(a, b), lt(a, b), le(a, b), gt(a, b), ge(a, b)
 between(date, lower, upper)
 min_date([dates]), max_date([dates])
@@ -98,7 +98,7 @@ min_date([dates]), max_date([dates])
 
 Rounding
 
-```
+```python
 floor_to_day(date), ceil_to_day(date)
 floor_to_week(date), ceil_to_week(date)
 floor_to_month(date), ceil_to_month(date)
@@ -108,7 +108,7 @@ floor_to_year(date), ceil_to_year(date)
 
 Ranges
 
-```
+```python
 date_range(start, end, step_days=1)
 month_range(start, end)
 year_range(start, end)
@@ -119,7 +119,7 @@ custom_range(start, end, days=0, months=0, years=0)
 
 ### Intervals
 
-```
+```python
 class Period:
 # years, months, days, hours, minutes, seconds
 def init(years=0, months=0, days=0, hours=0, minutes=0, seconds=0)
@@ -140,7 +140,7 @@ contains(date)
 
 ### Timezone
 
-```
+```python
 get_timezone(name: str)
 localize_datetime(dt, zone: str)
 convert_timezone(dt, target_zone: str)
@@ -154,7 +154,7 @@ list_timezones()
 
 ### DimDate Table (Analytics)
 
-```
+```python
 generate_dim_date(
 start: str,
 end: str,
@@ -167,7 +167,7 @@ include_fiscal: bool = False
 
 ### Utilities
 
-```
+```python
 days_in_month(year, month, calendar)
 is_jalali_leap(year)
 is_gregorian_leap(year)
