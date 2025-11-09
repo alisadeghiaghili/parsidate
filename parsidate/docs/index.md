@@ -31,7 +31,7 @@ Welcome to the official documentation for **ParsiDate**, a comprehensive Python 
 - [Publishing Instructions](PUBLISHING_GUIDE.md)
 - [Setup Instructions](FINAL_SETUP_GUIDE.txt)
 - [Test Coverage & Reports](FINAL_REPORT.txt)
-- [CHANGELOG](CHANGES.md)
+- [CHANGES](../../CHANGELOG.md)
 
 ---
 
@@ -50,9 +50,9 @@ Welcome to the official documentation for **ParsiDate**, a comprehensive Python 
 
 ## Testing / Examples
 
-- [Unit & Integration Tests](tests/)
-- [Example Scripts](examples/)
-- [DimDate Table Demo](dimdate/example.ipynb)
+- [Unit & Integration Tests](../tests/)
+- [Example Scripts](README_COMPLETE.md#examples)
+- [DimDate Table Demo](README_COMPLETE.md#dimension-date-generation)
 
 ---
 
