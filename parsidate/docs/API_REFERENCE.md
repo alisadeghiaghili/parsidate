@@ -39,7 +39,7 @@ Similar attributes and methods as JalaliDate.
 
 ### Converters
 
-```
+```python
 jalali_to_gregorian(year, month, day) -> (year, month, day)
 gregorian_to_jalali(year, month, day) -> (year, month, day)
 jalali_to_jdn(year, month, day) -> int (Julian Day Number)
