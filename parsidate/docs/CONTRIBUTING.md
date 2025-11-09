@@ -26,7 +26,7 @@ cd parsidate
 - Add or update docstrings and docs as appropriate.
 
 5. **Run tests and static checks**
-```
+```bash
 pytest tests/
 mypy parsidate/
 flake8 parsidate/
