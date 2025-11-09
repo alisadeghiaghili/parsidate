@@ -22,6 +22,7 @@ Inspired by R's powerful [lubridate](https://lubridate.tidyverse.org) package.
 - Pandas integration for dimensional date tables (dimdate feature)
 
 For more information take a look at [Complete Usage Guide](/parsidate/docs/README_COMPLETE.md).
+
 ---
 
 ## Installation
