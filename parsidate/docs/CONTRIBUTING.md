@@ -13,7 +13,7 @@ Thank you for your interest in contributing to ParsiDate!
 
 2. **Clone your fork**
 ```bash
-git clone https://github.com/your-username/parsidate.git
+git clone https://github.com/alisadeghiaghili/parsidate.git
 cd parsidate
 ```
 
