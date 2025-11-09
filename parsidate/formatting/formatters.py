@@ -91,3 +91,29 @@ def format_gregorian_date(
         "j": str(date.day()),
         "H": f"{date.hour():02d}",
         "i": f"{date.minute():02d}",
+        "s": f"{date.second():02d}",
+        "E": month_name(date.month(), locale, "gregorian"),
+        "M": month_name(date.month(), locale, "gregorian")[:3],
+        "l": weekday_name(date.weekday(), locale, "gregorian"),
+        "w": str(date.weekday()),
+        "q": str(date.quarter()),
+        "L": "1" if date.is_leap_year() else "0",
+    }
+    result = ""
+    esc = False
+    for c in pattern:
+        if esc:
+            result += c
+            esc = False
+            continue
+        if c == "\\":
+            esc = True
+            continue
+        if c in values:
+            val = values[c]
+            if locale == "fa" and c in ("Y", "y", "m", "n", "d", "j", "H", "i", "s", "w", "q", "L"):
+                val = to_persian_digits(val)
+            result += val
+        else:
+            result += c
+    return result
