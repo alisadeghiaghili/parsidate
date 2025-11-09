@@ -73,9 +73,9 @@ py.typed
 
 ## Documentation
 
-- [Complete Usage Guide](USAGE_GUIDE.md)
-- [Test Modules](tests/)
-- [API Reference](PARSIDATE_SUMMARY.md)
+- [Complete Usage Guide](/parsidate/docs/README_COMPLETE.md)
+- [Test Modules](/parsidate/tests/)
+- [API Reference](/parsidate/docs/API_REFERENCE.md)
 
 ---
 
