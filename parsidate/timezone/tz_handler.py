@@ -7,6 +7,7 @@ Licensed under GPL-3.0-or-later
 
 import pytz
 from datetime import timezone as dt_timezone, timedelta
+from typing import Union
 
 def get_timezone(name: str):
     """
@@ -83,3 +84,73 @@ def list_timezones():
     List all timezone names available in pytz.
     """
     return pytz.all_timezones
+
+def with_tz(date, tz: str):
+    """
+    Convert a date to a different timezone (changes the time).
+
+    This converts the date/time to a different timezone, adjusting the
+    hour/minute/second values to match the new timezone.
+
+    Args:
+        date: JalaliDate or GregorianDate with tzinfo
+        tz: Target timezone name (e.g., 'UTC', 'Asia/Tehran')
+
+    Returns:
+        New date object in the target timezone
+
+    Example:
+        date_tehran = jmd_hms("1403/08/18 14:30:00", tz="Asia/Tehran")
+        date_utc = with_tz(date_tehran, "UTC")  # Converts to UTC time
+    """
+    from datetime import datetime
+
+    # Create datetime from date object
+    dt = datetime(
+        date.year() if hasattr(date, 'year') else date.year,
+        date.month() if hasattr(date, 'month') else date.month,
+        date.day() if hasattr(date, 'day') else date.day,
+        date.hour() if hasattr(date, 'hour') else 0,
+        date.minute() if hasattr(date, 'minute') else 0,
+        date.second() if hasattr(date, 'second') else 0,
+        date.microsecond() if hasattr(date, 'microsecond') else 0,
+        tzinfo=date.tzinfo() if hasattr(date, 'tzinfo') else None
+    )
+
+    # Convert timezone
+    new_dt = convert_timezone(dt, tz)
+
+    # Create new date object with same type
+    new_date = date.copy()
+    new_date.hour(new_dt.hour)
+    new_date.minute(new_dt.minute)
+    new_date.second(new_dt.second)
+    new_date.microsecond(new_dt.microsecond)
+    new_date.tzinfo(new_dt.tzinfo)
+
+    return new_date
+
+
+def force_tz(date, tz: str):
+    """
+    Force a timezone onto a date without converting the time.
+
+    This sets the timezone but keeps the hour/minute/second values the same.
+    Useful when you have a naive date and want to assign it a timezone.
+
+    Args:
+        date: JalaliDate or GregorianDate (can be naive or aware)
+        tz: Timezone name to assign (e.g., 'UTC', 'Asia/Tehran')
+
+    Returns:
+        New date object with the specified timezone
+
+    Example:
+        date = jmd_hms("1403/08/18 14:30:00")  # Naive
+        date_tehran = force_tz(date, "Asia/Tehran")  # Same time, but with TZ
+    """
+    tz_obj = get_timezone(tz)
+    new_date = date.copy()
+    new_date.tzinfo(tz_obj)
+    return new_date
+
