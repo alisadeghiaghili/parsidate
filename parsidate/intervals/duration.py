@@ -113,3 +113,38 @@ class Duration:
             Duration object.
         """
         return cls(seconds=total_seconds)
+
+
+def hours(n: int) -> Duration:
+    """Create a Duration of n hours."""
+    return Duration(hours=n)
+
+
+def minutes(n: int) -> Duration:
+    """Create a Duration of n minutes."""
+    return Duration(minutes=n)
+
+
+def seconds(n: int) -> Duration:
+    """Create a Duration of n seconds."""
+    return Duration(seconds=n)
+
+
+def duration(**kwargs) -> Duration:
+    """
+    Create a Duration object using keyword arguments.
+
+    Args:
+        days: Number of days
+        hours: Number of hours
+        minutes: Number of minutes
+        seconds: Number of seconds
+        microseconds: Number of microseconds
+
+    Returns:
+        Duration object
+
+    Example:
+        duration(days=1, hours=5, minutes=30)
+    """
+    return Duration(**kwargs)
