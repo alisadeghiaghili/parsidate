@@ -45,4 +45,59 @@ class Interval:
             Duration object (parsidate.intervals.duration.Duration)
         """
         from parsidate.intervals.duration import Duration
-        # If classes implement __sub__ for two dates, returns
+        diff = self.end - self.start
+        if hasattr(diff, 'total_seconds'):
+            return Duration(seconds=diff.total_seconds())
+        elif hasattr(diff, 'days'):
+            return Duration(days=diff.days())
+        else:
+            return diff
+
+    def length(self, unit: str = "days") -> int:
+        """
+        Get length of interval in specified unit.
+
+        Args:
+            unit: "days", "hours", "minutes", or "seconds"
+
+        Returns:
+            Integer length
+        """
+        dur = self.duration()
+        if unit == "days":
+            return dur.days()
+        elif unit == "hours":
+            return int(dur.total_seconds() // 3600)
+        elif unit == "minutes":
+            return int(dur.total_seconds() // 60)
+        elif unit == "seconds":
+            return int(dur.total_seconds())
+        else:
+            raise ValueError(f"Invalid unit: {unit}")
+
+    def __contains__(self, date) -> bool:
+        """Check if date is within interval (inclusive)."""
+        return self.start <= date <= self.end
+
+    def __repr__(self) -> str:
+        return f"Interval(start={self.start}, end={self.end})"
+
+    def __str__(self) -> str:
+        return f"[{self.start} to {self.end}]"
+
+
+def interval(start, end) -> Interval:
+    """
+    Create an Interval object.
+
+    Args:
+        start: Start date (JalaliDate or GregorianDate)
+        end: End date (same type as start)
+
+    Returns:
+        Interval object
+
+    Example:
+        interval(jmd("1403/01/01"), jmd("1403/12/29"))
+    """
+    return Interval(start, end)
