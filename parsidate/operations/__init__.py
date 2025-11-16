@@ -20,14 +20,16 @@ from .arithmetic import (
 from .comparison import (
     eq, ne, lt, le, gt, ge,
     between,
-    min_date, max_date
+    min_date, max_date,
+    is_before, is_after, is_between,
 )
 from .rounding import (
     floor_to_day, ceil_to_day,
     floor_to_week, ceil_to_week,
     floor_to_month, ceil_to_month,
     floor_to_quarter, ceil_to_quarter,
-    floor_to_year, ceil_to_year
+    floor_to_year, ceil_to_year,
+    floor_date, ceiling_date, round_date,
 )
 
 __all__ = [
@@ -40,9 +42,11 @@ __all__ = [
     "eq", "ne", "lt", "le", "gt", "ge",
     "between",
     "min_date", "max_date",
+    "is_before", "is_after", "is_between",
     "floor_to_day", "ceil_to_day",
     "floor_to_week", "ceil_to_week",
     "floor_to_month", "ceil_to_month",
     "floor_to_quarter", "ceil_to_quarter",
-    "floor_to_year", "ceil_to_year"
+    "floor_to_year", "ceil_to_year",
+    "floor_date", "ceiling_date", "round_date",
 ]
