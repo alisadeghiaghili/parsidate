@@ -108,3 +108,21 @@ def weeks(n: int) -> Period:
 def days(n: int) -> Period:
     """Create a Period of n days."""
     return Period(days=n)
+
+def period(**kwargs) -> Period:
+    """
+    Create a Period object using keyword arguments.
+
+    Args:
+        years: Number of years
+        months: Number of months
+        weeks: Number of weeks
+        days: Number of days
+
+    Returns:
+        Period object
+
+    Example:
+        period(years=1, months=2, days=10)
+    """
+    return Period(**kwargs)
