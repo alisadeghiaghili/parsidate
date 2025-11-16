@@ -155,3 +155,92 @@ def today_gregorian(tz: Optional[str] = None) -> GregorianDate:
     """Get today Gregorian date with zeroed time and optional timezone."""
     n = now_gregorian(tz)
     return n.copy().hour(0).minute(0).second(0).microsecond(0)
+
+def parse_jalali(date_str: str, tz: Optional[str] = None) -> JalaliDate:
+    """
+    Smart parser for Jalali dates with flexible format support.
+
+    Automatically detects format and parses:
+    - Date only: "1403/08/18" or "1403-08-18"
+    - Date with time: "1403/08/18 14:30:25"
+    - Different separators: /, -, .
+
+    Args:
+        date_str: Date string to parse
+        tz: Optional timezone name
+
+    Returns:
+        JalaliDate object
+
+    Example:
+        parse_jalali("1403/08/18 14:30:25")
+        parse_jalali("1403-08-18")
+    """
+    s = to_english_digits(normalize_date_separator(date_str)).strip()
+
+    # Check if has time component
+    if ' ' in s:
+        parts = s.split()
+        date_part = parts[0]
+        time_part = parts[1] if len(parts) > 1 else "00:00:00"
+
+        # Parse date
+        y, m, d = map(int, date_part.split("/"))
+
+        # Parse time
+        time_components = time_part.split(":")
+        h = int(time_components[0]) if len(time_components) > 0 else 0
+        mi = int(time_components[1]) if len(time_components) > 1 else 0
+        se = int(time_components[2]) if len(time_components) > 2 else 0
+    else:
+        # Date only
+        y, m, d = map(int, s.split("/"))
+        h, mi, se = 0, 0, 0
+
+    tzinfo = pytz.timezone(tz) if tz else None
+    return JalaliDate(y, m, d, h, mi, se, 0, tzinfo)
+
+
+def parse_gregorian(date_str: str, tz: Optional[str] = None) -> GregorianDate:
+    """
+    Smart parser for Gregorian dates with flexible format support.
+
+    Automatically detects format and parses:
+    - Date only: "2024-11-08" or "2024/11/08"
+    - Date with time: "2024-11-08 14:30:25"
+    - Different separators: /, -, .
+
+    Args:
+        date_str: Date string to parse
+        tz: Optional timezone name
+
+    Returns:
+        GregorianDate object
+
+    Example:
+        parse_gregorian("2024-11-08 14:30:25")
+        parse_gregorian("2024/11/08")
+    """
+    s = to_english_digits(normalize_date_separator(date_str)).strip()
+
+    # Check if has time component
+    if ' ' in s:
+        parts = s.split()
+        date_part = parts[0]
+        time_part = parts[1] if len(parts) > 1 else "00:00:00"
+
+        # Parse date
+        y, m, d = map(int, date_part.split("/"))
+
+        # Parse time
+        time_components = time_part.split(":")
+        h = int(time_components[0]) if len(time_components) > 0 else 0
+        mi = int(time_components[1]) if len(time_components) > 1 else 0
+        se = int(time_components[2]) if len(time_components) > 2 else 0
+    else:
+        # Date only
+        y, m, d = map(int, s.split("/"))
+        h, mi, se = 0, 0, 0
+
+    tzinfo = pytz.timezone(tz) if tz else None
+    return GregorianDate(y, m, d, h, mi, se, 0, tzinfo)
