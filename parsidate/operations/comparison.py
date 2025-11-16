@@ -70,3 +70,61 @@ def max_date(*args):
         The latest date.
     """
     return max(args)
+
+def is_before(date1, date2) -> bool:
+    """
+    Check if date1 is before date2.
+
+    Alias for lt(date1, date2).
+
+    Args:
+        date1: First date
+        date2: Second date
+
+    Returns:
+        True if date1 < date2
+
+    Example:
+        is_before(jmd("1403/01/01"), jmd("1403/12/29"))  # True
+    """
+    return lt(date1, date2)
+
+
+def is_after(date1, date2) -> bool:
+    """
+    Check if date1 is after date2.
+
+    Alias for gt(date1, date2).
+
+    Args:
+        date1: First date
+        date2: Second date
+
+    Returns:
+        True if date1 > date2
+
+    Example:
+        is_after(jmd("1403/12/29"), jmd("1403/01/01"))  # True
+    """
+    return gt(date1, date2)
+
+
+def is_between(date, start, end, inclusive: bool = True) -> bool:
+    """
+    Check if date is between start and end.
+
+    Alias for between(date, start, end, inclusive).
+
+    Args:
+        date: Date to check
+        start: Start of range
+        end: End of range
+        inclusive: If True (default), includes boundaries
+
+    Returns:
+        True if date is in range
+
+    Example:
+        is_between(jmd("1403/06/15"), jmd("1403/01/01"), jmd("1403/12/29"))  # True
+    """
+    return between(date, start, end, inclusive)
