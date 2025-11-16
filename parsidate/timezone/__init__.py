@@ -13,6 +13,8 @@ from .tz_handler import (
     utc_offset_minutes,
     is_dst,
     list_timezones,
+    with_tz,
+    force_tz,
 )
 
 __all__ = [
@@ -23,4 +25,6 @@ __all__ = [
     "utc_offset_minutes",
     "is_dst",
     "list_timezones",
+    "with_tz",
+    "force_tz",
 ]
