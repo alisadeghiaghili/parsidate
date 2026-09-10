@@ -7,7 +7,7 @@
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.14.0 (beta)** — vectorized conversion + business calendar.  
+Status: **0.15.0 (beta)** — Persian text parse, ISO/timestamp, interop.  
 Roadmap: [ROADMAP.md](ROADMAP.md).
 
 ---

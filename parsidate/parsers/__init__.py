@@ -16,6 +16,7 @@ from .parse import (
     now_jalali, now_gregorian,
     today_jalali, today_gregorian,
 )
+from .persian_text import parse_fa, parse_gregorian_fa
 
 __all__ = [
     "jmd", "jdm", "jmdy", "jdmy", "jmd_hms",
@@ -25,6 +26,8 @@ __all__ = [
     "parse_gregorian",
     "strptime_jalali",
     "strptime_gregorian",
+    "parse_fa",
+    "parse_gregorian_fa",
     "now_jalali", "now_gregorian",
     "today_jalali", "today_gregorian",
 ]

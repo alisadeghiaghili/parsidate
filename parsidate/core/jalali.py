@@ -528,6 +528,153 @@ class JalaliDate:
         from parsidate.core.converters import jalali_to_gregorian
         return jalali_to_gregorian(self._year, self._month, self._day)
 
+    def isoformat(self, sep: str = "T", timespec: str = "auto") -> str:
+        """Return an ISO-8601-like string using Jalali Y-M-D.
+
+        Args:
+            sep: Separator between date and time (default ``T``).
+            timespec: ``auto``, ``seconds``, ``minutes``, ``hours``, or ``days``.
+
+        Returns:
+            e.g. ``1403-08-18`` or ``1403-08-18T14:30:25``.
+
+        Example:
+            >>> JalaliDate(1403, 8, 18).isoformat()
+            '1403-08-18'
+        """
+        date_part = f"{self._year:04d}-{self._month:02d}-{self._day:02d}"
+        if timespec == "days":
+            return date_part
+        if timespec == "auto" and not (
+            self._hour or self._minute or self._second or self._microsecond
+        ):
+            return date_part
+        time_part = f"{self._hour:02d}:{self._minute:02d}"
+        if timespec in ("auto", "seconds"):
+            time_part += f":{self._second:02d}"
+            if timespec == "auto" and self._microsecond:
+                time_part += f".{self._microsecond:06d}"
+        if timespec == "hours":
+            time_part = f"{self._hour:02d}"
+        return date_part + sep + time_part
+
+    @classmethod
+    def fromisoformat(cls, value: str) -> "JalaliDate":
+        """Parse an ISO-8601-like Jalali string.
+
+        Args:
+            value: ``YYYY-MM-DD`` or ``YYYY-MM-DDTHH:MM[:SS[.ffffff]]``.
+
+        Returns:
+            Parsed JalaliDate.
+
+        Raises:
+            ValueError: If the string is invalid.
+
+        Example:
+            >>> JalaliDate.fromisoformat("1403-08-18").day()
+            18
+        """
+        from parsidate.utils.helpers import to_english_digits
+
+        s = to_english_digits(value.strip())
+        if "T" in s:
+            date_part, time_part = s.split("T", 1)
+        elif " " in s:
+            date_part, time_part = s.split(" ", 1)
+        else:
+            date_part, time_part = s, ""
+        y, m, d = (int(x) for x in date_part.split("-"))
+        hour = minute = second = micro = 0
+        if time_part:
+            pieces = time_part.split(":")
+            hour = int(pieces[0]) if pieces[0] else 0
+            minute = int(pieces[1]) if len(pieces) > 1 and pieces[1] else 0
+            if len(pieces) > 2 and pieces[2]:
+                if "." in pieces[2]:
+                    sec_s, micro_s = pieces[2].split(".", 1)
+                    second = int(sec_s)
+                    micro = int(micro_s.ljust(6, "0")[:6])
+                else:
+                    second = int(pieces[2])
+        return cls(y, m, d, hour, minute, second, micro)
+
+    @classmethod
+    def from_datetime(cls, dt: "datetime") -> "JalaliDate":
+        """Build a JalaliDate from a Gregorian ``datetime``.
+
+        Args:
+            dt: Gregorian datetime.
+
+        Returns:
+            Equivalent JalaliDate (tzinfo preserved).
+
+        Example:
+            >>> from datetime import datetime
+            >>> JalaliDate.from_datetime(datetime(2024, 3, 20)).year()
+            1403
+        """
+        from parsidate.interop import from_datetime
+
+        return from_datetime(dt)
+
+    def to_datetime_naive(self) -> "datetime":
+        """Convert to a naive Gregorian ``datetime``.
+
+        Returns:
+            Wall-clock Gregorian datetime; tzinfo is dropped.
+
+        Example:
+            >>> JalaliDate(1403, 1, 1).to_datetime_naive().year
+            2024
+        """
+        from parsidate.interop import to_datetime_naive
+
+        return to_datetime_naive(self)
+
+    @classmethod
+    def fromtimestamp(cls, ts: float, tz=None) -> "JalaliDate":
+        """Build a JalaliDate from a POSIX timestamp.
+
+        Args:
+            ts: Seconds since the Unix epoch.
+            tz: Optional timezone (``tzinfo``); naive local time if omitted.
+
+        Returns:
+            JalaliDate.
+
+        Example:
+            >>> from datetime import datetime, timezone
+            >>> ts = datetime(2024, 3, 20, tzinfo=timezone.utc).timestamp()
+            >>> JalaliDate.fromtimestamp(ts, tz=timezone.utc).year()
+            1403
+        """
+        dt = datetime.fromtimestamp(ts, tz=tz) if tz is not None else datetime.fromtimestamp(ts)
+        return cls.from_datetime(dt)
+
+    def timestamp(self) -> float:
+        """Return the POSIX timestamp for this instant.
+
+        Naive values are interpreted as UTC for a deterministic mapping
+        through the equivalent Gregorian wall clock.
+
+        Returns:
+            Seconds since the Unix epoch (float).
+
+        Example:
+            >>> JalaliDate(1403, 1, 1).timestamp() > 0
+            True
+        """
+        from datetime import timezone as _tz
+
+        gy, gm, gd = self.to_gregorian()
+        dt = datetime(
+            gy, gm, gd, self._hour, self._minute, self._second, self._microsecond, self._tzinfo
+        )
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=_tz.utc)
+        return dt.timestamp()
+
     def __str__(self) -> str:
         """String representation."""
         return self.strftime("%Y/%m/%d %H:%M:%S", "en")
