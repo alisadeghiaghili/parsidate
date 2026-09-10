@@ -1,107 +1,217 @@
+"""Tests for Duration, Period, and Interval classes."""
+
 import pytest
-from parsidate.intervals.period import Period
-from parsidate.intervals.duration import Duration
-from parsidate.intervals.interval import Interval
-from parsidate.core import JalaliDate, GregorianDate
+from parsidate.core.jalali import JalaliDate
+from parsidate.core.gregorian import GregorianDate
+from parsidate.intervals.duration import Duration, duration
+from parsidate.intervals.period import Period, period
+from parsidate.intervals.interval import Interval, interval
 
-def test_period_init_and_properties():
-    p = Period(years=2, months=5)
-    assert p.years == 2 and p.months == 5
-    assert isinstance(str(p), str)
-    p2 = Period(days=10)
-    assert p2.days == 10
 
-def test_duration_init_and_properties():
-    d = Duration(days=3, hours=7, minutes=25)
-    assert d.days == 3 and d.hours == 7 and d.minutes == 25
-    assert isinstance(str(d), str)
-    d2 = Duration(seconds=1800)
-    assert d2.seconds == 1800
+class TestDuration:
+    def test_creation(self):
+        d = Duration(days=1, hours=5, minutes=30)
+        assert d.days() == 1
+        assert d.hours() == 5
+        assert d.minutes() == 30
 
-def test_period_addition():
-    p1 = Period(years=1, months=2)
-    p2 = Period(months=5, days=7)
-    p3 = p1 + p2
-    assert isinstance(p3, Period)
-    assert p3.years == 1 and p3.months == 7 and p3.days == 7
+    def test_total_seconds(self):
+        d = Duration(hours=1)
+        assert d.total_seconds() == 3600
 
-def test_duration_addition():
-    d1 = Duration(days=2, hours=3)
-    d2 = Duration(days=1, hours=5, minutes=10)
-    d3 = d1 + d2
-    assert isinstance(d3, Duration)
-    assert d3.days == 3 and d3.hours == 8 and d3.minutes == 10
+    def test_add(self):
+        d1 = Duration(hours=1)
+        d2 = Duration(hours=2)
+        d3 = d1 + d2
+        assert d3.hours() == 3
 
-def test_period_subtraction():
-    p1 = Period(months=10)
-    p2 = Period(months=2)
-    p3 = p1 - p2
-    assert p3.months == 8
+    def test_sub(self):
+        d1 = Duration(hours=3)
+        d2 = Duration(hours=1)
+        d3 = d1 - d2
+        assert d3.hours() == 2
 
-def test_duration_subtraction():
-    d1 = Duration(days=5)
-    d2 = Duration(days=2)
-    d3 = d1 - d2
-    assert d3.days == 3
+    def test_neg(self):
+        d = Duration(hours=1)
+        d2 = -d
+        assert d2.total_seconds() == -3600
 
-def test_interval_basic():
-    start = JalaliDate(1402, 2, 1, 10)
-    end = JalaliDate(1402, 3, 1, 8)
-    interval = Interval(start, end)
-    assert interval.start == start and interval.end == end
-    assert isinstance(str(interval), str)
-    assert interval.length().days > 0
+    def test_equality(self):
+        d1 = Duration(hours=1)
+        d2 = Duration(hours=1)
+        assert d1 == d2
 
-def test_interval_contains():
-    start = GregorianDate(2024, 1, 1)
-    end = GregorianDate(2024, 2, 1)
-    interval = Interval(start, end)
-    inside = GregorianDate(2024, 1, 15)
-    outside = GregorianDate(2023, 12, 31)
-    assert interval.contains(inside)
-    assert not interval.contains(outside)
+    def test_repr(self):
+        d = Duration(days=1, hours=5)
+        r = repr(d)
+        assert "Duration" in r
 
-def test_period_apply_on_date():
-    date = JalaliDate(1402, 1, 1)
-    p = Period(years=2, months=3, days=10)
-    result = date + p
-    assert result.year() == 1404 or result.month() == 4
+    def test_str(self):
+        d = Duration(days=1, hours=5, minutes=30)
+        s = str(d)
+        assert "1d" in s
+        assert "5h" in s
 
-def test_duration_apply_on_date():
-    date = GregorianDate(2024, 11, 8, 22)
-    d = Duration(days=7, hours=5)
-    result = date + d
-    assert isinstance(result, GregorianDate)
-    assert result.day() >= 15 or result.hour() == 3
+    def test_from_seconds(self):
+        d = Duration.from_seconds(3661)
+        assert d.hours() == 1
+        assert d.minutes() == 1
+        assert d.seconds() == 1
 
-def test_interval_length():
-    start = JalaliDate(1402, 5, 15)
-    end = JalaliDate(1402, 5, 20)
-    interval = Interval(start, end)
-    dur = interval.length()
-    assert isinstance(dur, Duration)
-    assert dur.days == 5
 
-def test_period_and_duration_equality():
-    p1 = Period(years=1, months=2)
-    p2 = Period(years=1, months=2)
-    d1 = Duration(days=3, hours=4)
-    d2 = Duration(days=3, hours=4)
-    assert p1 == p2
-    assert d1 == d2
+class TestDurationFactory:
+    def test_hours(self):
+        d = duration(hours=5)
+        assert d.hours() == 5
 
-def test_str_repr_period_duration_interval():
-    p = Period(years=2)
-    d = Duration(days=5)
-    start = JalaliDate(1400, 4, 1)
-    end = JalaliDate(1400, 4, 10)
-    i = Interval(start, end)
-    assert isinstance(str(p), str)
-    assert isinstance(str(d), str)
-    assert isinstance(str(i), str)
+    def test_minutes(self):
+        d = duration(minutes=30)
+        assert d.minutes() == 30
 
-def test_invalid_interval():
-    start = JalaliDate(1401, 8, 20)
-    end = JalaliDate(1400, 8, 20)
-    with pytest.raises(ValueError):
-        Interval(start, end)
+    def test_days(self):
+        d = duration(days=7)
+        assert d.days() == 7
+
+
+class TestPeriod:
+    def test_creation(self):
+        p = Period(years=1, months=2, weeks=3, days=4)
+        assert p.years == 1
+        assert p.months == 2
+        assert p.weeks == 3
+        assert p.days == 4
+
+    def test_add(self):
+        p1 = Period(months=2)
+        p2 = Period(months=3)
+        p3 = p1 + p2
+        assert p3.months == 5
+
+    def test_sub(self):
+        p1 = Period(months=5)
+        p2 = Period(months=2)
+        p3 = p1 - p2
+        assert p3.months == 3
+
+    def test_neg(self):
+        p = Period(months=2)
+        p2 = -p
+        assert p2.months == -2
+
+    def test_equality(self):
+        p1 = Period(months=2, days=5)
+        p2 = Period(months=2, days=5)
+        assert p1 == p2
+
+    def test_total_days(self):
+        p = Period(weeks=1, days=3)
+        assert p.total_days() == 10
+
+    def test_repr(self):
+        p = Period(years=1, months=2)
+        r = repr(p)
+        assert "Period" in r
+
+    def test_str(self):
+        p = Period(years=1, months=2, weeks=3, days=4)
+        s = str(p)
+        assert "1y" in s
+        assert "2m" in s
+
+
+class TestPeriodFactory:
+    def test_years(self):
+        p = period(years=2)
+        assert p.years == 2
+
+    def test_months(self):
+        p = period(months=3)
+        assert p.months == 3
+
+
+class TestInterval:
+    def test_creation(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        assert iv.start == start
+        assert iv.end == end
+
+    def test_invalid_order(self):
+        start = JalaliDate(1403, 1, 10)
+        end = JalaliDate(1403, 1, 1)
+        with pytest.raises(ValueError):
+            Interval(start, end)
+
+    def test_contains(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        mid = JalaliDate(1403, 1, 5)
+        assert mid in iv
+
+    def test_length(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        assert iv.length("days") == 9
+
+    def test_repr(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        r = repr(iv)
+        assert "Interval" in r
+
+    def test_str(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        s = str(iv)
+        assert "[" in s
+
+
+class TestIntervalFactory:
+    def test_interval(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = interval(start, end)
+        assert isinstance(iv, Interval)
+
+    def test_duration(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        dur = iv.duration()
+        assert dur.days() == 9
+
+    def test_length_hours(self):
+        start = JalaliDate(1403, 1, 1, 0, 0, 0)
+        end = JalaliDate(1403, 1, 2, 0, 0, 0)
+        iv = Interval(start, end)
+        assert iv.length("hours") == 24
+
+    def test_length_minutes(self):
+        start = JalaliDate(1403, 1, 1, 0, 0, 0)
+        end = JalaliDate(1403, 1, 1, 1, 0, 0)
+        iv = Interval(start, end)
+        assert iv.length("minutes") == 60
+
+    def test_length_seconds(self):
+        start = JalaliDate(1403, 1, 1, 0, 0, 0)
+        end = JalaliDate(1403, 1, 1, 0, 1, 0)
+        iv = Interval(start, end)
+        assert iv.length("seconds") == 60
+
+    def test_length_invalid_unit(self):
+        start = JalaliDate(1403, 1, 1)
+        end = JalaliDate(1403, 1, 10)
+        iv = Interval(start, end)
+        with pytest.raises(ValueError):
+            iv.length("invalid")
+
+    def test_different_types_error(self):
+        j = JalaliDate(1403, 1, 1)
+        g = GregorianDate(2024, 1, 1)
+        with pytest.raises(TypeError):
+            Interval(j, g)
