@@ -27,27 +27,32 @@ if TYPE_CHECKING:
 
 
 class JalaliDate:
-    """Jalali (Persian/Solar Hijri) date and time class.
+    """Immutable Jalali (Persian/Solar Hijri) date and time class.
 
-    This class provides functionality for working with Persian calendar dates,
-    including parsing, formatting, arithmetic operations, and conversions.
+    All operations return NEW objects. Original objects are never modified.
 
     Attributes:
-        year: Jalali year.
-        month: Jalali month (1-12).
-        day: Jalali day (1-31).
-        hour: Hour (0-23).
-        minute: Minute (0-59).
-        second: Second (0-59).
-        microsecond: Microsecond (0-999999).
-        tzinfo: Timezone information.
+        year: Jalali year (read-only).
+        month: Jalali month (1-12, read-only).
+        day: Jalali day (1-31, read-only).
+        hour: Hour (0-23, read-only).
+        minute: Minute (0-59, read-only).
+        second: Second (0-59, read-only).
+        microsecond: Microsecond (0-999999, read-only).
+        tzinfo: Timezone information (read-only).
 
-    Examples:
-        >>> date = JalaliDate(1403, 8, 18)
-        >>> date.format("Y/m/d")
-        "1403/08/18"
-        >>> date.add(months=2, days=5)
+    Example:
+        >>> jdate = JalaliDate(1403, 8, 18)
+        >>> new_date = jdate.add(months=2)
+        >>> jdate.month()
+        8
+        >>> new_date.month()
+        10
+        >>> (JalaliDate(1403, 1, 10) - JalaliDate(1403, 1, 1)).days()
+        9
     """
+
+    __slots__ = ('_year', '_month', '_day', '_hour', '_minute', '_second', '_microsecond', '_tzinfo')
 
     def __init__(
         self,
@@ -60,7 +65,7 @@ class JalaliDate:
         microsecond: int = 0,
         tzinfo: Optional[tzinfo] = None
     ):
-        """Initialize a JalaliDate object.
+        """Initialize an immutable JalaliDate object.
 
         Args:
             year: Jalali year.
@@ -74,29 +79,46 @@ class JalaliDate:
 
         Raises:
             ValueError: If date components are invalid.
-        """
-        from parsidate.utils.helpers import days_in_month as get_days_in_month
 
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 45, 30)
+            >>> print(jdate.year(), jdate.month(), jdate.day())
+            1402 8 18
+            >>> jdate_simple = JalaliDate(1403, 1, 1) # Midnight by default
+            >>> print(jdate_simple.hour(), jdate_simple.minute())
+            0 0
+        """
         self._validate_date(year, month, day)
         self._validate_time(hour, minute, second, microsecond)
 
-        self._year = year
-        self._month = month
-        self._day = day
-        self._hour = hour
-        self._minute = minute
-        self._second = second
-        self._microsecond = microsecond
-        self._tzinfo = tzinfo
+        object.__setattr__(self, '_year', year)
+        object.__setattr__(self, '_month', month)
+        object.__setattr__(self, '_day', day)
+        object.__setattr__(self, '_hour', hour)
+        object.__setattr__(self, '_minute', minute)
+        object.__setattr__(self, '_second', second)
+        object.__setattr__(self, '_microsecond', microsecond)
+        object.__setattr__(self, '_tzinfo', tzinfo)
+
+    def __setattr__(self, name, value):
+        """Prevent modification after initialization."""
+        raise AttributeError(f"JalaliDate is immutable. Cannot set {name}")
+
+    def __delattr__(self, name):
+        """Prevent deletion of attributes."""
+        raise AttributeError(f"JalaliDate is immutable. Cannot delete {name}")
 
     @staticmethod
     def _validate_date(year: int, month: int, day: int) -> None:
-        """Validate date components."""
-        from parsidate.utils.helpers import days_in_month as get_days_in_month
+        """Validate date components.
 
+        Example:
+            >>> JalaliDate._validate_date(1402, 13, 1)  # Raises ValueError
+            >>> JalaliDate._validate_date(1402, 12, 29)  # OK
+        """
+        from parsidate.utils.helpers import days_in_month as get_days_in_month
         if not 1 <= month <= 12:
             raise ValueError(f"Month must be between 1 and 12, got {month}")
-
         max_day = get_days_in_month(year, month, "jalali")
         if not 1 <= day <= max_day:
             raise ValueError(
@@ -105,13 +127,13 @@ class JalaliDate:
             )
 
     @staticmethod
-    def _validate_time(
-        hour: int,
-        minute: int,
-        second: int,
-        microsecond: int
-    ) -> None:
-        """Validate time components."""
+    def _validate_time(hour: int, minute: int, second: int, microsecond: int) -> None:
+        """Validate time components.
+
+        Example:
+            >>> JalaliDate._validate_time(14, 30, 45, 0)  # OK
+            >>> JalaliDate._validate_time(25, 30, 45, 0)  # Raises ValueError
+        """
         if not 0 <= hour <= 23:
             raise ValueError(f"Hour must be between 0 and 23, got {hour}")
         if not 0 <= minute <= 59:
@@ -119,97 +141,172 @@ class JalaliDate:
         if not 0 <= second <= 59:
             raise ValueError(f"Second must be between 0 and 59, got {second}")
         if not 0 <= microsecond <= 999999:
-            raise ValueError(
-                f"Microsecond must be between 0 and 999999, got {microsecond}"
-            )
+            raise ValueError(f"Microsecond must be between 0 and 999999, got {microsecond}")
 
-    def year(self, new_year: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set year.
+    # Read-only properties
+    def year(self) -> int:
+        """Get year (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.year()
+            1402
+        """
+        return self._year
+
+    def month(self) -> int:
+        """Get month (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.month()
+            8
+        """
+        return self._month
+
+    def day(self) -> int:
+        """Get day (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.day()
+            18
+        """
+        return self._day
+
+    def hour(self) -> int:
+        """Get hour (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 30)
+            >>> jdate.hour()
+            14
+        """
+        return self._hour
+
+    def minute(self) -> int:
+        """Get minute (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 30)
+            >>> jdate.minute()
+            30
+        """
+        return self._minute
+
+    def second(self) -> int:
+        """Get second (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 30, 45)
+            >>> jdate.second()
+            45
+        """
+        return self._second
+
+    def microsecond(self) -> int:
+        """Get microsecond (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 30, 45, 123456)
+            >>> jdate.microsecond()
+            123456
+        """
+        return self._microsecond
+
+    def tzinfo(self) -> Optional[tzinfo]:
+        """Get timezone info (read-only).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.tzinfo() is None
+            True
+        """
+        return self._tzinfo
+
+    def to_ordinal(self) -> int:
+        """Return proleptic Gregorian ordinal for this calendar day.
+
+        Independent of time-of-day; safe for day-count arithmetic
+        across Jalali leap years.
+
+        Returns:
+            Gregorian ordinal (days since 0001-01-01).
+
+        Example:
+            >>> d = JalaliDate(1403, 1, 1)
+            >>> d.to_ordinal() == d.to_ordinal()
+            True
+        """
+        from datetime import date as _date
+        from parsidate.core.converters import jalali_to_gregorian
+
+        gy, gm, gd = jalali_to_gregorian(self._year, self._month, self._day)
+        return _date(gy, gm, gd).toordinal()
+
+    def _seconds_from_midnight(self) -> float:
+        """Return seconds elapsed since midnight, including microseconds."""
+        return (
+            self._hour * 3600
+            + self._minute * 60
+            + self._second
+            + self._microsecond / 1_000_000
+        )
+
+    def replace(
+        self,
+        year: Optional[int] = None,
+        month: Optional[int] = None,
+        day: Optional[int] = None,
+        hour: Optional[int] = None,
+        minute: Optional[int] = None,
+        second: Optional[int] = None,
+        microsecond: Optional[int] = None,
+        tzinfo: Optional[tzinfo] = None
+    ) -> "JalaliDate":
+        """Return new JalaliDate with specified fields replaced.
+
+        Similar to datetime.replace(). Returns a NEW object.
 
         Args:
-            new_year: New year value, or None to get current year.
+            year: New year value (optional).
+            month: New month value (optional).
+            day: New day value (optional).
+            hour: New hour value (optional).
+            minute: New minute value (optional).
+            second: New second value (optional).
+            microsecond: New microsecond value (optional).
+            tzinfo: New timezone info (optional).
 
         Returns:
-            Current year if new_year is None, else self for chaining.
+            New JalaliDate object with replaced values.
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 30)
+            >>> new_date = jdate.replace(year=1403, month=10)
+            >>> jdate.year()  # Original unchanged
+            1402
+            >>> new_date.year()  # New object
+            1403
         """
-        if new_year is None:
-            return self._year
-        from parsidate.utils.helpers import days_in_month as get_days_in_month
-        self._validate_date(new_year, self._month, self._day)
-        self._year = new_year
-        return self
-
-    def month(self, new_month: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set month."""
-        if new_month is None:
-            return self._month
-        self._validate_date(self._year, new_month, self._day)
-        self._month = new_month
-        return self
-
-    def day(self, new_day: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set day."""
-        if new_day is None:
-            return self._day
-        self._validate_date(self._year, self._month, new_day)
-        self._day = new_day
-        return self
-
-    def hour(self, new_hour: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set hour."""
-        if new_hour is None:
-            return self._hour
-        self._validate_time(new_hour, self._minute, self._second, self._microsecond)
-        self._hour = new_hour
-        return self
-
-    def minute(self, new_minute: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set minute."""
-        if new_minute is None:
-            return self._minute
-        self._validate_time(self._hour, new_minute, self._second, self._microsecond)
-        self._minute = new_minute
-        return self
-
-    def second(self, new_second: Optional[int] = None) -> Union[int, "JalaliDate"]:
-        """Get or set second."""
-        if new_second is None:
-            return self._second
-        self._validate_time(self._hour, self._minute, new_second, self._microsecond)
-        self._second = new_second
-        return self
-
-    def microsecond(
-        self,
-        new_microsecond: Optional[int] = None
-    ) -> Union[int, "JalaliDate"]:
-        """Get or set microsecond."""
-        if new_microsecond is None:
-            return self._microsecond
-        self._validate_time(
-            self._hour,
-            self._minute,
-            self._second,
-            new_microsecond
+        return JalaliDate(
+            year if year is not None else self._year,
+            month if month is not None else self._month,
+            day if day is not None else self._day,
+            hour if hour is not None else self._hour,
+            minute if minute is not None else self._minute,
+            second if second is not None else self._second,
+            microsecond if microsecond is not None else self._microsecond,
+            tzinfo if tzinfo is not None else self._tzinfo
         )
-        self._microsecond = new_microsecond
-        return self
-
-    def tzinfo(
-        self,
-        new_tzinfo: Optional[tzinfo] = None
-    ) -> Union[Optional[tzinfo], "JalaliDate"]:
-        """Get or set timezone info."""
-        if new_tzinfo is None:
-            return self._tzinfo
-        self._tzinfo = new_tzinfo
-        return self
 
     def weekday(self) -> int:
-        """Get day of week (0=Saturday, 6=Friday).
+        """Get day of week (0=Shanbeh, 6=Jom'eh).
 
-        Returns:
-            Day of week as integer.
+        Example:
+            >>> jdate = JalaliDate(1404, 10, 4, 0, 0, 0, 0, 'Iran')
+            >>> jdate.weekday()
+            6
         """
         from parsidate.core.converters import jalali_to_gregorian
         gy, gm, gd = jalali_to_gregorian(self._year, self._month, self._day)
@@ -219,11 +316,25 @@ class JalaliDate:
         return (py_weekday + 2) % 7
 
     def quarter(self) -> int:
-        """Get quarter of year (1-4)."""
+        """Get quarter of year (1-4).
+
+        Example:
+            >>> JalaliDate(1402, 2, 15).quarter()
+            1
+            >>> JalaliDate(1402, 8, 18).quarter()
+            3
+        """
         return (self._month - 1) // 3 + 1
 
     def day_of_year(self) -> int:
-        """Get day number in year (1-365/366)."""
+        """Get day number in year (1-365/366).
+
+        Example:
+            >>> JalaliDate(1402, 1, 1).day_of_year()
+            1
+            >>> JalaliDate(1402, 2, 1).day_of_year()
+            32
+        """
         from parsidate.utils.helpers import days_in_month as get_days_in_month
         days = 0
         for m in range(1, self._month):
@@ -233,8 +344,11 @@ class JalaliDate:
     def is_leap_year(self) -> bool:
         """Check if current year is leap year.
 
-        Returns:
-            True if leap year, False otherwise.
+        Example:
+            >>> JalaliDate(1403, 1, 1).is_leap_year()
+            True
+            >>> JalaliDate(1402, 1, 1).is_leap_year()
+            False
         """
         from parsidate.utils.helpers import is_leap_year as check_leap_year
         return check_leap_year(self._year, "jalali")
@@ -248,7 +362,9 @@ class JalaliDate:
         minutes: int = 0,
         seconds: int = 0
     ) -> "JalaliDate":
-        """Add time periods to date.
+        """Return NEW date with added time periods.
+
+        Original object remains unchanged (immutable).
 
         Args:
             years: Years to add.
@@ -259,10 +375,25 @@ class JalaliDate:
             seconds: Seconds to add.
 
         Returns:
-            Self for method chaining.
+            New JalaliDate object with added time.
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> new_date = jdate.add(months=2, days=5)
+            >>> jdate.month()  # Original unchanged
+            8
+            >>> new_date.month()  # New object
+            10
+            >>> 
+            >>> # Crossing year boundary
+            >>> jdate2 = JalaliDate(1402, 12, 29)
+            >>> result = jdate2.add(days=5)
+            >>> result.strftime("%Y/%m/%d")
+            '1403/01/04'
         """
         from parsidate.utils.helpers import days_in_month as get_days_in_month
 
+        # Calculate new date
         new_year = self._year + years
         new_month = self._month + months
 
@@ -276,41 +407,40 @@ class JalaliDate:
         max_day = get_days_in_month(new_year, new_month, "jalali")
         new_day = min(self._day, max_day)
 
-        self._year = new_year
-        self._month = new_month
-        self._day = new_day
+        # Add days
+        new_day += days
+        while new_day > get_days_in_month(new_year, new_month, "jalali"):
+            new_day -= get_days_in_month(new_year, new_month, "jalali")
+            new_month += 1
+            if new_month > 12:
+                new_month = 1
+                new_year += 1
 
-        self._day += days
-        while self._day > get_days_in_month(self._year, self._month, "jalali"):
-            self._day -= get_days_in_month(self._year, self._month, "jalali")
-            self._month += 1
-            if self._month > 12:
-                self._month = 1
-                self._year += 1
+        while new_day < 1:
+            new_month -= 1
+            if new_month < 1:
+                new_month = 12
+                new_year -= 1
+            new_day += get_days_in_month(new_year, new_month, "jalali")
 
-        while self._day < 1:
-            self._month -= 1
-            if self._month < 1:
-                self._month = 12
-                self._year -= 1
-            self._day += get_days_in_month(self._year, self._month, "jalali")
+        # Add time
+        new_second = self._second + seconds
+        new_minute = self._minute + (new_second // 60) + minutes
+        new_second = new_second % 60
 
-        self._second += seconds
-        self._minute += self._second // 60
-        self._second %= 60
+        new_hour = self._hour + (new_minute // 60) + hours
+        new_minute = new_minute % 60
 
-        self._minute += minutes
-        self._hour += self._minute // 60
-        self._minute %= 60
+        extra_days = new_hour // 24
+        new_hour = new_hour % 24
 
-        self._hour += hours
-        extra_days = self._hour // 24
-        self._hour %= 24
+        # Create new object
+        result = JalaliDate(new_year, new_month, new_day, new_hour, new_minute, new_second, self._microsecond, self._tzinfo)
 
         if extra_days > 0:
-            self.add(days=extra_days)
+            result = result.add(days=extra_days)
 
-        return self
+        return result
 
     def sub(
         self,
@@ -321,7 +451,9 @@ class JalaliDate:
         minutes: int = 0,
         seconds: int = 0
     ) -> "JalaliDate":
-        """Subtract time periods from date.
+        """Return NEW date with subtracted time periods.
+
+        Original object remains unchanged (immutable).
 
         Args:
             years: Years to subtract.
@@ -332,7 +464,15 @@ class JalaliDate:
             seconds: Seconds to subtract.
 
         Returns:
-            Self for method chaining.
+            New JalaliDate object with subtracted time.
+
+        Example:
+            >>> jdate = JalaliDate(1402, 10, 15)
+            >>> new_date = jdate.sub(months=2, days=5)
+            >>> jdate.month()  # Original unchanged
+            10
+            >>> new_date.month()  # New object
+            8
         """
         return self.add(
             years=-years,
@@ -343,51 +483,66 @@ class JalaliDate:
             seconds=-seconds
         )
 
-    def format(self, pattern: str, locale: Literal["fa", "en"] = "en") -> str:
-        """Format date according to pattern.
-
-        Format codes:
-            Y - 4-digit year (1403)
-            y - 2-digit year (03)
-            m - Month with leading zero (08)
-            n - Month without leading zero (8)
-            d - Day with leading zero (18)
-            j - Day without leading zero (18)
-            H - Hour 24-format with leading zero (14)
-            i - Minute with leading zero (30)
-            s - Second with leading zero (25)
-            E - Full month name
-            M - Short month name
-            l - Full weekday name
-            w - Weekday number (4)
-            q - Quarter (3)
-            L - Is leap year (0 or 1)
+    def strftime(self, pattern: str, locale: str = "fa") -> str:
+        """Format date using strftime-style format codes.
 
         Args:
-            pattern: Format pattern string.
-            locale: Locale for names ("fa" or "en").
+            pattern: Format string (e.g., "%Y/%m/%d %H:%M:%S")
+            locale: Locale for month/weekday names ("fa" or "en")
 
         Returns:
-            Formatted date string.
+            Formatted date string
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18, 14, 45, 30)
+            >>> jdate.strftime("%Y/%m/%d %H:%M:%S")
+            '1402/08/18 14:45:30'
+            >>> jdate.strftime("%A، %d %B %Y", locale="fa")
+            'سه‌شنبه، ۱۸ آبان ۱۴۰۲'
         """
         from parsidate.formatting.formatters import format_jalali_date
         return format_jalali_date(self, pattern, locale)
 
+    def format(self, pattern: str, locale: str = "fa") -> str:
+        """Format date (alias for strftime).
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.format("%Y/%m/%d")
+            '1402/08/18'
+        """
+        return self.strftime(pattern, locale)
+
     def copy(self) -> "JalaliDate":
-        """Create a copy of this date.
+        """Return a copy (though unnecessary for immutable objects).
+
+        Since JalaliDate is immutable, this returns self.
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate2 = jdate.copy()
+            >>> jdate is jdate2  # Same object (immutable)
+            True
+        """
+        return self  # Immutable, no need to copy
+
+    def to_gregorian(self) -> tuple[int, int, int]:
+        """Convert to Gregorian calendar date.
 
         Returns:
-            New JalaliDate instance with same values.
+            Tuple of (year, month, day) in Gregorian calendar.
+
+        Example:
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> jdate.to_gregorian()
+            (2023, 11, 9)
         """
-        return JalaliDate(
-            self._year, self._month, self._day,
-            self._hour, self._minute, self._second,
-            self._microsecond, self._tzinfo
-        )
+        from parsidate.core.converters import jalali_to_gregorian
+        return jalali_to_gregorian(self._year, self._month, self._day)
 
     def __str__(self) -> str:
         """String representation."""
-        return self.format("Y/m/d H:i:s", "en")
+        return self.strftime("%Y/%m/%d %H:%M:%S", "en")
 
     def __repr__(self) -> str:
         """Developer representation."""
@@ -397,53 +552,73 @@ class JalaliDate:
         )
 
     def __eq__(self, other: object) -> bool:
-        """Check equality."""
+        """Check equality including microseconds.
+
+        Timezone is intentionally ignored so naive and aware instances
+        that share wall-clock fields compare equal.
+        """
         if not isinstance(other, JalaliDate):
             return False
         return (
-            self._year == other._year and
-            self._month == other._month and
-            self._day == other._day and
-            self._hour == other._hour and
-            self._minute == other._minute and
-            self._second == other._second
+            self._year == other._year
+            and self._month == other._month
+            and self._day == other._day
+            and self._hour == other._hour
+            and self._minute == other._minute
+            and self._second == other._second
+            and self._microsecond == other._microsecond
         )
+
+    def _cmp_key(self) -> tuple:
+        """Return ordering key including microseconds."""
+        return (
+            self._year,
+            self._month,
+            self._day,
+            self._hour,
+            self._minute,
+            self._second,
+            self._microsecond,
+        )
+
+    def __hash__(self) -> int:
+        """Hash using the same fields as ``__eq__``."""
+        return hash(self._cmp_key())
 
     def __lt__(self, other: "JalaliDate") -> bool:
         """Less than comparison."""
-        if self._year != other._year:
-            return self._year < other._year
-        if self._month != other._month:
-            return self._month < other._month
-        if self._day != other._day:
-            return self._day < other._day
-        if self._hour != other._hour:
-            return self._hour < other._hour
-        if self._minute != other._minute:
-            return self._minute < other._minute
-        return self._second < other._second
+        return self._cmp_key() < other._cmp_key()
 
     def __le__(self, other: "JalaliDate") -> bool:
-        """Less than or equal comparison."""
+        """Less than or equal."""
         return self == other or self < other
 
     def __gt__(self, other: "JalaliDate") -> bool:
-        """Greater than comparison."""
+        """Greater than."""
         return not self <= other
 
     def __ge__(self, other: "JalaliDate") -> bool:
-        """Greater than or equal comparison."""
+        """Greater than or equal."""
         return not self < other
 
     def __add__(self, other: Union["Period", "Duration"]) -> "JalaliDate":
-        """Add Period or Duration to date."""
+        """Add Period or Duration. Returns NEW object.
+
+        Example:
+            >>> from parsidate.intervals import Period
+            >>> jdate = JalaliDate(1402, 8, 18)
+            >>> p = Period(months=2, days=5)
+            >>> new_date = jdate + p
+            >>> jdate.month()  # Original unchanged
+            8
+            >>> new_date.month()
+            10
+        """
         from parsidate.intervals.period import Period
         from parsidate.intervals.duration import Duration
 
-        new_date = self.copy()
-
         if isinstance(other, Period):
-            new_date.add(
+            return self.add(
                 years=other.years,
                 months=other.months,
                 days=other.days + other.weeks * 7
@@ -456,51 +631,66 @@ class JalaliDate:
             remaining %= 3600
             minutes_to_add = remaining // 60
             seconds_to_add = remaining % 60
-            new_date.add(
+            return self.add(
                 days=days_to_add,
                 hours=hours_to_add,
                 minutes=minutes_to_add,
                 seconds=seconds_to_add
             )
-
-        return new_date
+        return NotImplemented
 
     def __sub__(
         self,
         other: Union["JalaliDate", "Period", "Duration"]
     ) -> Union["Duration", "JalaliDate"]:
-        """Subtract date, Period, or Duration."""
+        """Subtract a date, Period, or Duration.
+
+        When ``other`` is a ``JalaliDate``, returns a ``Duration`` equal
+        to the elapsed wall-clock time (leap years and time-of-day included).
+
+        Args:
+            other: Value to subtract from this date.
+
+        Returns:
+            ``Duration`` for date subtraction, or a new ``JalaliDate``
+            for Period/Duration subtraction.
+
+        Raises:
+            TypeError: If ``other`` is an unsupported type.
+
+        Example:
+            >>> j1 = JalaliDate(1403, 1, 10)
+            >>> j0 = JalaliDate(1403, 1, 1)
+            >>> (j1 - j0).days()
+            9
+        """
+        from parsidate.intervals.period import Period
+        from parsidate.intervals.duration import Duration
+
         if isinstance(other, JalaliDate):
-            from parsidate.intervals.duration import Duration
-            days_diff = self.day_of_year() - other.day_of_year()
-            years_diff = self._year - other._year
-            days_diff += years_diff * 365
-            return Duration(days=days_diff)
-        else:
-            from parsidate.intervals.period import Period
-            from parsidate.intervals.duration import Duration
-
-            new_date = self.copy()
-
-            if isinstance(other, Period):
-                new_date.sub(
-                    years=other.years,
-                    months=other.months,
-                    days=other.days + other.weeks * 7
-                )
-            elif isinstance(other, Duration):
-                total_seconds = other.total_seconds()
-                days_to_sub = int(total_seconds // 86400)
-                remaining = int(total_seconds % 86400)
-                hours_to_sub = remaining // 3600
-                remaining %= 3600
-                minutes_to_sub = remaining // 60
-                seconds_to_sub = remaining % 60
-                new_date.sub(
-                    days=days_to_sub,
-                    hours=hours_to_sub,
-                    minutes=minutes_to_sub,
-                    seconds=seconds_to_sub
-                )
-
-            return new_date
+            day_diff = self.to_ordinal() - other.to_ordinal()
+            sec_diff = day_diff * 86400 + (
+                self._seconds_from_midnight() - other._seconds_from_midnight()
+            )
+            return Duration(seconds=sec_diff)
+        if isinstance(other, Period):
+            return self.sub(
+                years=other.years,
+                months=other.months,
+                days=other.days + other.weeks * 7,
+            )
+        if isinstance(other, Duration):
+            total_seconds = other.total_seconds()
+            days_to_sub = int(total_seconds // 86400)
+            remaining = int(total_seconds % 86400)
+            hours_to_sub = remaining // 3600
+            remaining %= 3600
+            minutes_to_sub = remaining // 60
+            seconds_to_sub = remaining % 60
+            return self.sub(
+                days=days_to_sub,
+                hours=hours_to_sub,
+                minutes=minutes_to_sub,
+                seconds=seconds_to_sub,
+            )
+        return NotImplemented
