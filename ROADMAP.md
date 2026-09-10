@@ -1,13 +1,13 @@
 # ParsiDate Roadmap
 
-**Status:** R1–R4 shipped (0.13–0.16). R5 planned (Hijri spike).
+**Status:** R1–R5 shipped (0.13–0.17). API freeze path → 1.0.0.
 
 **Positioning:** analytics-ready Persian (Solar Hijri) calendar toolkit for
 data warehouses, pipelines, and Industry 4.0 reporting — not another thin
 `jdatetime` clone.
 
-**Current version:** 0.16.0 (beta)  
-**Target stable:** 1.0.0 after soak
+**Current version:** 0.17.0 (beta)  
+**Target stable:** 1.0.0 after soak (no P0 for 2+ weeks)
 
 ---
 
@@ -219,7 +219,7 @@ calendar. Full `HijriDate` only if a concrete user demands civil Hijri I/O.
 | 0.14.0 | R2 vector | **shipped** |
 | 0.15.0 | R3 interop | **shipped** |
 | 0.16.0 | R4 dim_date v2 | **shipped** |
-| 0.17.0 | R5 spike notes | decision recorded |
+| 0.17.0 | R5 Hijri tabular | **shipped** |
 | **1.0.0** | API freeze | 0.13–0.16 soaked ≥ 2 weeks, no P0 |
 
 Each release = one PR, tests green, CHANGELOG, version bump, branch deleted after merge.

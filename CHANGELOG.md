@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.17.0] - 2024-11-09
+
+### Added
+- `HijriDate`: tabular (civil) Islamic calendar with ±1 day expected
+  accuracy vs observational tables; conversions to/from Jalali/Gregorian
+- Documented non-goal: not Umm al-Qura; Iranian holidays remain in
+  `parsidate.holidays` as published Jalali dates
+
 ## [0.16.0] - 2024-11-09
 
 ### Added

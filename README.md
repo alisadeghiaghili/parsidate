@@ -7,7 +7,7 @@
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.16.0 (beta)** — warehouse dim_date + business calendar.  
+Status: **0.17.0 (beta)** — Hijri tabular + warehouse dim_date.  
 Roadmap: [ROADMAP.md](ROADMAP.md).
 
 ---
