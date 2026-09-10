@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- `ROADMAP.md`: planned R1–R5 phases for post-0.12 versions (backlog only)
+
 ## [0.12.0] - 2024-11-09
 
 ### Added
