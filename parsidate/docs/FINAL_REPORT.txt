@@ -64,7 +64,7 @@ QUALITY ASSURANCE
 CONTRIBUTORS & LICENSE
 
 Author: Ali Sadeghi Aghili (alisadeghiaghili@gmail.com)
-License: GNU GPL v3 (see LICENSE)
+License: Apache License 2.0 (see LICENSE)
 
 ---
 

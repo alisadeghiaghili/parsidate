@@ -103,9 +103,18 @@ class TestPeriod:
         p2 = Period(months=2, days=5)
         assert p1 == p2
 
-    def test_total_days(self):
+    def test_fixed_days(self):
         p = Period(weeks=1, days=3)
-        assert p.total_days() == 10
+        assert p.fixed_days() == 10
+        assert p.approx_days() == 10
+
+    def test_period_immutable(self):
+        p = Period(months=1)
+        try:
+            p.months = 2  # type: ignore[misc]
+            raise AssertionError("Period should be immutable")
+        except AttributeError:
+            pass
 
     def test_repr(self):
         p = Period(years=1, months=2)

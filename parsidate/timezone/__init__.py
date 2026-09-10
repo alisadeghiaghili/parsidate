@@ -2,7 +2,7 @@
 parsidate.timezone: Timezone handlers and helpers for ParsiDate.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Licensed under the Apache License, Version 2.0
 """
 
 from .tz_handler import (

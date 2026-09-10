@@ -1,13 +1,13 @@
 # ParsiDate: Persian & Gregorian Calendar Library for Python
 
 [![PyPI version](https://badge.fury.io/py/parsidate.svg)](https://badge.fury.io/py/parsidate)
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.10.0 (beta)** — architecture pass: zoneinfo, Duration ordering, CI.
+Status: **0.11.0 (beta)** — Apache-2.0 license; architecture hardening.
 
 ---
 
@@ -152,12 +152,14 @@ Format strings use Python-standard `strftime` / `strptime` codes only
 
 ## ⚖️ License
 
-**GNU General Public License v3.0 or later (GPL-3.0-or-later)**
+**Apache License, Version 2.0**
 
 ```
-Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Copyright 2024 Ali Sadeghi Aghili
+Licensed under the Apache License, Version 2.0
 ```
+
+See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ---
 

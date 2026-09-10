@@ -77,7 +77,7 @@ If you encounter a bug or want a feature, open an issue. Provide:
 
 ### License
 
-By contributing, you agree that your code may be licensed under GPLv3 to all users of this repository.
+By contributing, you agree that your code may be licensed under Apache-2.0 to all users of this repository.
 
 ---
 

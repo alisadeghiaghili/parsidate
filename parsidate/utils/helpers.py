@@ -2,7 +2,7 @@
 Utility helper functions for date operations and conversions.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Licensed under the Apache License, Version 2.0
 """
 
 from typing import Literal

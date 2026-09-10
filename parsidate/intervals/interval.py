@@ -2,7 +2,7 @@
 Interval: Range class for intervals between two dates, precise or calendar-based.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Licensed under the Apache License, Version 2.0
 """
 
 from typing import Union
@@ -25,13 +25,18 @@ class Interval:
         Initialize interval.
 
         Args:
-            start: Start date/time object (JalaliDate or GregorianDate)
-            end: End date/time object (same type as start)
+            start: Start date/time object (JalaliDate or GregorianDate).
+            end: End date/time object (same type as start).
+
         Raises:
-            ValueError if types don't match or end < start
+            TypeError: If start and end types differ.
+            ValueError: If end is before start.
         """
-        if type(start) != type(end):
-            raise TypeError(f"Start and end must be of same type (got {type(start).__name__} and {type(end).__name__})")
+        if type(start) is not type(end):
+            raise TypeError(
+                f"Start and end must be of same type "
+                f"(got {type(start).__name__} and {type(end).__name__})"
+            )
         if end < start:
             raise ValueError("End date must be >= start date.")
         self.start = start

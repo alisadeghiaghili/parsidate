@@ -2,10 +2,10 @@
 ParsiDate: Comprehensive Persian/Gregorian Date Toolkit for Python.
 """
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 __author__ = "Ali Sadeghi Aghili"
 __email__ = "alisadeghiaghili@gmail.com"
-__license__ = "GPL-3.0-or-later"
+__license__ = "Apache-2.0"
 __url__ = "https://github.com/alisadeghiaghili/parsidate"
 
 from parsidate.core.jalali import JalaliDate

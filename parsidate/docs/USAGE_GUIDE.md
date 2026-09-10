@@ -229,7 +229,7 @@ All functions and classes raise appropriate exceptions (ValueError, TypeError) f
 Run all tests via: `pytest tests/ -v`
 
 
-For contributions, fork the repository and submit pull requests. All code must comply with GPL-3.0-or-later.
+For contributions, fork the repository and submit pull requests. All code must comply with Apache-2.0.
 
 ---
 
