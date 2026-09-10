@@ -7,7 +7,7 @@
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.11.0 (beta)** — Apache-2.0 license; architecture hardening.
+Status: **0.12.0 (beta)** — Windows tzdata, property tests, docs cleanup.
 
 ---
 
