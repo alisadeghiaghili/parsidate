@@ -50,23 +50,11 @@ def _days_in_month(year: int, month: int) -> int:
 
 
 def _hijri_to_jdn(year: int, month: int, day: int) -> int:
-    y = year - 1
-    return (
-        day
-        + 29 * (month - 1)
-        + (month // 2)  # 0 for odd, 1 for even → 30/29 pattern via table not this
-        + y * 354
-        + (3 + 11 * year) // 30
-        + _HIJRI_EPOCH_JDN
-    )
-
-
-def _hijri_to_jdn(year: int, month: int, day: int) -> int:
     """JDN for a tabular Hijri date (civil algorithm)."""
-    y = year - 1
     months_before = 0
     for m in range(1, month):
         months_before += _days_in_month(year, m)
+    y = year - 1
     return (
         _HIJRI_EPOCH_JDN
         + y * 354
