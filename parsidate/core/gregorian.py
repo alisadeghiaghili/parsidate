@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta, tzinfo, timezone
 from typing import Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -331,6 +331,101 @@ class GregorianDate:
             2024
         """
         return self._dt
+
+    def isoformat(self, sep: str = "T", timespec: str = "auto") -> str:
+        """Return ISO-8601 string for the wrapped datetime.
+
+        Args:
+            sep: Date/time separator.
+            timespec: Passed through to ``datetime.isoformat``.
+
+        Returns:
+            ISO-8601 string.
+
+        Example:
+            >>> GregorianDate(2024, 11, 8).isoformat()
+            '2024-11-08T00:00:00'
+        """
+        return self._dt.isoformat(sep=sep, timespec=timespec)
+
+    @classmethod
+    def fromisoformat(cls, value: str) -> "GregorianDate":
+        """Parse an ISO-8601 string.
+
+        Args:
+            value: ISO-8601 datetime/date string.
+
+        Returns:
+            Parsed GregorianDate.
+
+        Example:
+            >>> GregorianDate.fromisoformat("2024-11-08").day()
+            8
+        """
+        dt = datetime.fromisoformat(value)
+        return cls(
+            dt.year,
+            dt.month,
+            dt.day,
+            dt.hour,
+            dt.minute,
+            dt.second,
+            dt.microsecond,
+            dt.tzinfo,
+        )
+
+    @classmethod
+    def from_datetime(cls, dt: datetime) -> "GregorianDate":
+        """Build from a ``datetime``.
+
+        Args:
+            dt: Source datetime.
+
+        Returns:
+            Wrapped GregorianDate.
+
+        Example:
+            >>> from datetime import datetime
+            >>> GregorianDate.from_datetime(datetime(2024, 1, 1)).year()
+            2024
+        """
+        return cls(
+            dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond, dt.tzinfo
+        )
+
+    @classmethod
+    def fromtimestamp(cls, ts: float, tz=None) -> "GregorianDate":
+        """Build from a POSIX timestamp.
+
+        Args:
+            ts: Seconds since epoch.
+            tz: Optional timezone.
+
+        Returns:
+            GregorianDate.
+
+        Example:
+            >>> GregorianDate.fromtimestamp(0, tz=timezone.utc).year()
+            1970
+        """
+        dt = datetime.fromtimestamp(ts, tz=tz) if tz is not None else datetime.fromtimestamp(ts)
+        return cls.from_datetime(dt)
+
+    def timestamp(self) -> float:
+        """Return POSIX timestamp.
+
+        Naive values are treated as UTC.
+
+        Returns:
+            Seconds since epoch.
+
+        Example:
+            >>> GregorianDate(1970, 1, 1, tzinfo=timezone.utc).timestamp()
+            0.0
+        """
+        if self._dt.tzinfo is None:
+            return self._dt.replace(tzinfo=timezone.utc).timestamp()
+        return self._dt.timestamp()
 
     def add(
         self,

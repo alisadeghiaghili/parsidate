@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.15.0] - 2024-11-09
+
+### Added
+- `parse_fa` / `parse_gregorian_fa` for Persian written dates
+  (`۱۸ آبان ۱۴۰۳`, optional weekday prefix)
+- `JalaliDate.isoformat` / `fromisoformat`, `timestamp` / `fromtimestamp`
+- `GregorianDate.isoformat` / `fromisoformat`, `timestamp` / `fromtimestamp`
+- `parsidate.interop`: `from_datetime`, `to_datetime_naive`,
+  `to_jdatetime`, `from_jdatetime` (optional extra `jdatetime`)
+
 ## [0.14.0] - 2024-11-09
 
 ### Added
