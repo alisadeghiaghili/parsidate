@@ -10,7 +10,7 @@
 
 class JalaliDate:
 ```python
-def init(year, month, day, hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
+def __init__(year, month, day, hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
 year() # Get/set year
 month() # Get/set month
 day() # Get/set day
@@ -19,16 +19,41 @@ minute() # Get/set minute
 second() # Get/set second
 microsecond() # Get/set microsecond
 tzinfo() # Get/set time zone
-format(fmt: str, locale='fa'|'en') -> str
+strftime(pattern: str, locale='fa'|'en') -> str  # Format using strftime codes
+format(pattern: str, locale='fa'|'en') -> str    # Alias for strftime
 copy() # Return a new copy
 is_leap_year() # True if leap
-weekday() # 0-6 (Monday=0)
+weekday() # 0-6 (Saturday=0)
 quarter() # 1-4
 day_of_year() # 1-366
 add(**kwargs) # Arithmetic: years, months, days, hours, minutes, seconds
 sub(**kwargs) # Negative arithmetic
 to_gregorian() # Tuple (year, month, day)
 str, repr, comparison ops
+```
+
+**strftime Format Codes:**
+```
+%Y - 4-digit year (1402)
+%y - 2-digit year (02)
+%m - month with leading zero (01-12)
+%d - day with leading zero (01-31)
+%H - hour 24-hour format (00-23)
+%I - hour 12-hour format (01-12)
+%M - minute (00-59)
+%S - second (00-59)
+%f - microsecond (000000-999999)
+%p - AM/PM (ق.ظ/ب.ظ in Farsi)
+%B - full month name (Farvardin, فروردین)
+%b - abbreviated month name (Far, فرو)
+%A - full weekday name (Shanbe, شنبه)
+%a - abbreviated weekday name (Sha, ش)
+%w - weekday as number (0-6)
+%j - day of year (001-366)
+%% - literal %
+
+Non-standard:
+%-m, %-d, %-H, %-I, %-M, %-S - without leading zeros
 ```
 
 #### GregorianDate
@@ -67,12 +92,21 @@ parse_date(str) # Auto detect calendar
 ### Formatting
 
 ```python
-format_jalali_date(date, locale='fa'|'en') # Standard fa/en
-format_gregorian_date(date, locale='fa'|'en')
-format_full(date, locale='fa'|'en')
-format_short(date, locale='fa'|'en')
-format_iso(date) # ISO 8601
-format_date_custom(date, fmt: str, locale='fa'|'en')
+format_jalali_date(date, pattern: str, locale='fa'|'en') # Using strftime codes
+format_gregorian_date(date, pattern: str, locale='fa'|'en')
+
+# Or use directly on date objects:
+jdate.strftime("%Y/%m/%d %H:%M:%S")
+gdate.strftime("%Y-%m-%d %H:%M:%S")
+```
+
+**Examples:**
+```python
+jdate = JalaliDate(1402, 8, 18, 14, 45, 30)
+jdate.strftime("%Y/%m/%d %H:%M:%S")           # '1402/08/18 14:45:30'
+jdate.strftime("%A، %d %B %Y", locale="fa")   # 'سه‌شنبه، ۱۸ آبان ۱۴۰۲'
+jdate.strftime("%Y-%m-%d")                    # '1402-08-18'
+jdate.strftime("%I:%M %p")                    # '02:45 PM' or '۰۲:۴۵ ب.ظ'
 ```
 
 ---
@@ -104,6 +138,7 @@ floor_to_week(date), ceil_to_week(date)
 floor_to_month(date), ceil_to_month(date)
 floor_to_quarter(date), ceil_to_quarter(date)
 floor_to_year(date), ceil_to_year(date)
+floor_date(date, unit), ceiling_date(date, unit), round_date(date, unit)
 ```
 
 Ranges
@@ -121,19 +156,19 @@ custom_range(start, end, days=0, months=0, years=0)
 
 ```python
 class Period:
-# years, months, days, hours, minutes, seconds
-def init(years=0, months=0, days=0, hours=0, minutes=0, seconds=0)
+    # years, months, days, hours, minutes, seconds
+    def __init__(years=0, months=0, days=0, hours=0, minutes=0, seconds=0)
 
 class Duration:
-# days, hours, minutes, seconds
-def init(days=0, hours=0, minutes=0, seconds=0)
-days(), hours(), minutes(), seconds()
+    # days, hours, minutes, seconds
+    def __init__(days=0, hours=0, minutes=0, seconds=0)
+    days(), hours(), minutes(), seconds()
 
 class Interval:
-# start, end
-def init(start, end)
-length() # returns Duration
-contains(date)
+    # start, end
+    def __init__(start, end)
+    length() # returns Duration
+    contains(date)
 ```
 
 ---
@@ -156,10 +191,10 @@ list_timezones()
 
 ```python
 generate_dim_date(
-start: str,
-end: str,
-calendar: 'jalali'|'gregorian' = 'jalali',
-include_fiscal: bool = False
+    start: str,
+    end: str,
+    calendar: 'jalali'|'gregorian' = 'jalali',
+    include_fiscal: bool = False
 ) -> pandas.DataFrame
 ```
 
@@ -185,4 +220,3 @@ Check docs for per-function details.
 ---
 
 Maintainer: Ali Sadeghi Aghili (alisadeghiaghili@gmail.com)
-

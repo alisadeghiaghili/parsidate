@@ -103,17 +103,17 @@ LOCALES = {
 }
 
 def get_month_name(month: int, locale: str = "en", calendar: str = "jalali", short: bool = False) -> str:
-    """
-    Retrieve the month name for a given number, locale, and calendar system.
-    """
+    """Retrieve the month name for a given number, locale, and calendar system."""
+    if not 1 <= month <= 12:
+        raise ValueError(f"Month must be between 1 and 12, got {month}")
     key = f"{calendar}_{locale}" if calendar == "gregorian" else locale
     names = LOCALES[key]["month_names_short"] if short else LOCALES[key]["month_names"]
     return names[month - 1]
 
 def get_weekday_name(weekday: int, locale: str = "en", calendar: str = "jalali", short: bool = False) -> str:
-    """
-    Retrieve the weekday name for a given number, locale, and calendar system.
-    """
+    """Retrieve the weekday name for a given number, locale, and calendar system."""
+    if not 0 <= weekday <= 6:
+        raise ValueError(f"Weekday must be between 0 and 6, got {weekday}")
     key = f"{calendar}_{locale}" if calendar == "gregorian" else locale
     names = LOCALES[key]["weekday_names_short"] if short else LOCALES[key]["weekday_names"]
     return names[weekday % 7]

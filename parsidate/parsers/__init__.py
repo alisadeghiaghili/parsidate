@@ -11,6 +11,8 @@ from .parse import (
     parse_date,
     parse_jalali,
     parse_gregorian,
+    strptime_jalali,
+    strptime_gregorian,
     now_jalali, now_gregorian,
     today_jalali, today_gregorian,
 )
@@ -21,6 +23,8 @@ __all__ = [
     "parse_date",
     "parse_jalali",
     "parse_gregorian",
+    "strptime_jalali",
+    "strptime_gregorian",
     "now_jalali", "now_gregorian",
     "today_jalali", "today_gregorian",
 ]

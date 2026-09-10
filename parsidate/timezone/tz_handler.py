@@ -55,8 +55,7 @@ def remove_timezone(dt):
     return dt.replace(tzinfo=None)
 
 def utc_offset_minutes(tz_name: str) -> int:
-    """
-    Get UTC offset in minutes for a timezone (relative to now).
+    """Get UTC offset in minutes for a timezone (relative to now).
 
     Args:
         tz_name: Timezone string.
@@ -64,20 +63,31 @@ def utc_offset_minutes(tz_name: str) -> int:
     Returns:
         UTC offset in minutes (int).
     """
+    import datetime as _dt
     tz = get_timezone(tz_name)
-    offset = tz.utcoffset(None)
-    if offset is None:
-        # Use current time
-        import datetime as _dt
-        offset = tz.utcoffset(_dt.datetime.now(tz))
+    naive_now = _dt.datetime.now()
+    offset = tz.utcoffset(naive_now)
     return int(offset.total_seconds() // 60)
 
 def is_dst(dt, tz_name: str) -> bool:
-    """
-    Returns True if given datetime is in daylight saving for that timezone.
+    """Return whether a datetime falls in daylight saving time.
+
+    Args:
+        dt: Naive or aware ``datetime``.
+        tz_name: IANA timezone name such as ``\"Asia/Tehran\"``.
+
+    Returns:
+        ``True`` if the datetime is in DST for that zone.
+
+    Example:
+        >>> from datetime import datetime
+        >>> is_dst(datetime(2024, 7, 1, 12, 0), "UTC")
+        False
     """
     tz = get_timezone(tz_name)
-    return bool(tz.dst(dt))
+    if dt.tzinfo is None:
+        dt = tz.localize(dt)
+    return bool(dt.dst())
 
 def list_timezones():
     """
@@ -122,13 +132,13 @@ def with_tz(date, tz: str):
 
     # Create new date object with same type
     new_date = date.copy()
-    new_date.hour(new_dt.hour)
-    new_date.minute(new_dt.minute)
-    new_date.second(new_dt.second)
-    new_date.microsecond(new_dt.microsecond)
-    new_date.tzinfo(new_dt.tzinfo)
-
-    return new_date
+    return new_date.replace(
+        hour=new_dt.hour,
+        minute=new_dt.minute,
+        second=new_dt.second,
+        microsecond=new_dt.microsecond,
+        tzinfo=new_dt.tzinfo
+    )
 
 
 def force_tz(date, tz: str):
@@ -150,7 +160,5 @@ def force_tz(date, tz: str):
         date_tehran = force_tz(date, "Asia/Tehran")  # Same time, but with TZ
     """
     tz_obj = get_timezone(tz)
-    new_date = date.copy()
-    new_date.tzinfo(tz_obj)
-    return new_date
+    return date.replace(tzinfo=tz_obj)
 

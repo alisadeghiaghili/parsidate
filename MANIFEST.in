@@ -2,11 +2,12 @@ include LICENSE
 include README.md
 include CHANGELOG.md
 include pyproject.toml
+include ATTRIBUTION.md
 recursive-include parsidate *.py
 recursive-include parsidate py.typed
-recursive-include tests *.py
-recursive-include docs *.md *.rst
-prune docs/_build
+recursive-include parsidate/docs *.md *.rst *.txt
+prune parsidate/docs/_build
 global-exclude __pycache__
 global-exclude *.py[co]
 global-exclude .DS_Store
+global-exclude !*.py
