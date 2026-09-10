@@ -2,7 +2,7 @@
 ParsiDate: Comprehensive Persian/Gregorian Date Toolkit for Python.
 """
 
-__version__ = "0.16.0"
+__version__ = "0.17.0"
 __author__ = "Ali Sadeghi Aghili"
 __email__ = "alisadeghiaghili@gmail.com"
 __license__ = "Apache-2.0"
@@ -10,6 +10,7 @@ __url__ = "https://github.com/alisadeghiaghili/parsidate"
 
 from parsidate.core.jalali import JalaliDate
 from parsidate.core.gregorian import GregorianDate
+from parsidate.core.hijri import HijriDate
 from parsidate.core.converters import to_jalali, to_gregorian
 from parsidate.parsers.parse import (
     jmd, ymd, jmd_hms, ymd_hms,
@@ -36,7 +37,7 @@ from parsidate.holidays import (
 )
 
 __all__ = [
-    "JalaliDate", "GregorianDate",
+    "JalaliDate", "GregorianDate", "HijriDate",
     "to_jalali", "to_gregorian",
     "jmd", "ymd", "jmd_hms", "ymd_hms",
     "parse_jalali", "parse_gregorian", "parse_date",
