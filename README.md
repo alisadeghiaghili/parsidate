@@ -7,7 +7,8 @@
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.12.0 (beta)** — Windows tzdata, property tests, docs cleanup.
+Status: **0.12.0 (beta)** — Windows tzdata, property tests, docs cleanup.  
+Roadmap for future releases: [ROADMAP.md](ROADMAP.md) (not implemented yet).
 
 ---
 
@@ -18,7 +19,7 @@ Status: **0.12.0 (beta)** — Windows tzdata, property tests, docs cleanup.
 - **Date parsing & formatting** with **Python-standard `strftime` codes** ✅
 - **Date arithmetic** (add/subtract days, weeks, months, years, intervals)
 - **Comparison, min/max, rounding** (floor/ceil to day, week, month, quarter, year)
-- **Timezone handling** & conversion (support for pytz zones)
+- **Timezone handling** via stdlib `zoneinfo` (IANA names)
 - **Date ranges** & sequence generators
 - **Complete test coverage** 
 - **Pandas integration** for dimensional date tables (dimdate feature)
