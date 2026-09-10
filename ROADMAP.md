@@ -1,13 +1,27 @@
 # ParsiDate Roadmap
 
-**Status:** R1–R5 shipped (0.13–0.17). API freeze path → 1.0.0.
+**Status:** R1–R5 shipped (0.13–0.18). Release `v0.18.0` published. API freeze path → 1.0.0.
 
 **Positioning:** analytics-ready Persian (Solar Hijri) calendar toolkit for
 data warehouses, pipelines, and Industry 4.0 reporting — not another thin
 `jdatetime` clone.
 
-**Current version:** 0.17.0 (beta)  
+**Current version:** 0.18.0 (beta)  
 **Target stable:** 1.0.0 after soak (no P0 for 2+ weeks)
+
+## 1.0 readiness checklist
+
+- [x] P0 correctness (leap diffs, immutability, packaging)
+- [x] Apache-2.0
+- [x] CI matrix
+- [x] Business calendar + custom HolidayCalendar
+- [x] Vector convert, interop, dim_date, Hijri tabular
+- [x] GitHub release tags
+- [ ] PyPI upload of 0.18.x
+- [ ] 2+ week soak without P0
+- [ ] API freeze review (public `__all__` only)
+- [ ] Classifier → Production/Stable
+- [ ] Tag `v1.0.0`
 
 ---
 
