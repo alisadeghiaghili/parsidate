@@ -13,3 +13,6 @@ htmlcov/
 .DS_Store
 .env
 venv/
+.venv/
+# Editor accident backups in package tree
+parsidate/core/!*.py

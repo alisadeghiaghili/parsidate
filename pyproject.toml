@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parsidate"
-version = "1.0.0"
-description = "Comprehensive Persian (Jalali/Solar Hijri) and Gregorian date toolkit for Python, inspired by R's lubridate"
+version = "0.9.0"
+description = "Persian (Jalali/Solar Hijri) and Gregorian date toolkit for Python, inspired by R's lubridate"
 readme = "README.md"
 authors = [
     {name = "Ali Sadeghi Aghili", email = "alisadeghiaghili@gmail.com"}
@@ -17,12 +17,11 @@ keywords = [
     "Ali Sadeghi Aghili", "Ali Aghili", "Seyed Ali Sadeghi Aghili"
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -32,7 +31,7 @@ classifiers = [
     "Topic :: Software Development :: Localization",
     "Topic :: Software Development :: Internationalization"
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "python-dateutil>=2.8.0",
     "pytz>=2021.1",
@@ -67,29 +66,31 @@ Repository = "https://github.com/alisadeghiaghili/parsidate"
 "Bug Tracker" = "https://github.com/alisadeghiaghili/parsidate/issues"
 Changelog = "https://github.com/alisadeghiaghili/parsidate/blob/main/CHANGELOG.md"
 
-[tool.setuptools]
-packages = ["parsidate"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["parsidate*"]
+exclude = ["parsidate.tests*"]
 
 [tool.setuptools.package-data]
 parsidate = ["py.typed"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py39", "py310", "py311", "py312", "py313"]
 
 [tool.isort]
 profile = "black"
 line_length = 88
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["parsidate/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=parsidate --cov-report=html --cov-report=term"
+addopts = "-q --cov=parsidate --cov-report=term"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
