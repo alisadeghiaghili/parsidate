@@ -28,7 +28,7 @@ class HolidaySet:
         True
     """
 
-    __slots__ = ("_dates",)
+    __slots__ = ("_dates", "_keys")
 
     def __init__(self, dates: Optional[Iterable[JalaliDate]] = None) -> None:
         """Initialize a HolidaySet.
@@ -43,6 +43,7 @@ class HolidaySet:
         unique = {(d.year(), d.month(), d.day()) for d in (dates or [])}
         ordered = [JalaliDate(y, m, d) for y, m, d in sorted(unique)]
         object.__setattr__(self, "_dates", tuple(ordered))
+        object.__setattr__(self, "_keys", frozenset(unique))
 
     def __setattr__(self, name: str, value: object) -> None:
         raise AttributeError(f"HolidaySet is immutable. Cannot set {name}")
@@ -85,8 +86,7 @@ class HolidaySet:
 
     def __contains__(self, date: JalaliDate) -> bool:
         """Return whether a date is a holiday."""
-        key = (date.year(), date.month(), date.day())
-        return any((d.year(), d.month(), d.day()) == key for d in self._dates)
+        return (date.year(), date.month(), date.day()) in self._keys
 
     def __iter__(self):
         """Iterate holiday dates."""

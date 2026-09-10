@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.15.0] - 2024-11-09
+## [0.16.0] - 2024-11-09
+
+### Added
+- Warehouse-grade `generate_dim_date` columns: `is_business_day`,
+  `holiday_name`, ISO week fields, `month_start`/`month_end`,
+  `ytd_flag`/`mtd_flag`
+- `use_iran_holidays` default for Jalali dim ranges
+- `HolidaySet` O(1) membership
+
+## [0.15.1] - 2024-11-09
 
 ### Added
 - `parse_fa` / `parse_gregorian_fa` for Persian written dates
