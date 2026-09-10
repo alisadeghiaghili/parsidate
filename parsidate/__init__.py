@@ -2,7 +2,7 @@
 ParsiDate: Comprehensive Persian/Gregorian Date Toolkit for Python.
 """
 
-__version__ = "0.15.0"
+__version__ = "0.15.1"
 __author__ = "Ali Sadeghi Aghili"
 __email__ = "alisadeghiaghili@gmail.com"
 __license__ = "Apache-2.0"
@@ -17,6 +17,7 @@ from parsidate.parsers.parse import (
     strptime_jalali, strptime_gregorian,
     now_jalali, now_gregorian, today_jalali, today_gregorian
 )
+from parsidate.parsers.persian_text import parse_fa, parse_gregorian_fa
 from parsidate.utils.helpers import is_leap_year
 from parsidate.intervals.duration import Duration, duration
 from parsidate.intervals.period import Period, period
@@ -40,6 +41,7 @@ __all__ = [
     "jmd", "ymd", "jmd_hms", "ymd_hms",
     "parse_jalali", "parse_gregorian", "parse_date",
     "strptime_jalali", "strptime_gregorian",
+    "parse_fa", "parse_gregorian_fa",
     "now_jalali", "now_gregorian", "today_jalali", "today_gregorian",
     "is_leap_year",
     "Duration", "duration",
