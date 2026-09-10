@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.18.0] - 2024-11-09
+
+### Added
+- `HolidayCalendar`: layered official + custom/company holiday days
+- `with_holidays` / `add_holidays` (strings or JalaliDate, optional label)
+- Built-in `networkdays` / `add_business_days` / `is_business_day` on the calendar
+- `HolidaySet.from_strings` (Persian digits supported)
+- `generate_dim_date` accepts `HolidayCalendar` for weekend + labels
+
 ## [0.17.0] - 2024-11-09
 
 ### Added

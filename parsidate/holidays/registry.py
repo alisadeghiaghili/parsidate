@@ -133,6 +133,24 @@ class HolidaySet:
         }
 
     @classmethod
+    def from_strings(cls, dates: Iterable[str]) -> "HolidaySet":
+        """Build a set from ``YYYY/MM/DD`` strings (Persian digits OK).
+
+        Args:
+            dates: Date strings such as ``1403/08/18`` or ``۱۴۰۳/۰۸/۱۸``.
+
+        Returns:
+            HolidaySet of parsed dates.
+
+        Example:
+            >>> HolidaySet.from_strings(["1403/01/01"]).is_empty()
+            False
+        """
+        from parsidate.parsers import jmd
+
+        return cls(dates=[jmd(s) for s in dates])
+
+    @classmethod
     def from_payload(cls, payload: dict) -> "HolidaySet":
         """Deserialize from :meth:`to_payload` output.
 
