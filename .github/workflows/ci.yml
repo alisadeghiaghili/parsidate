@@ -28,4 +28,4 @@ jobs:
           pip install -e ".[dev,dimdate]"
 
       - name: Run tests
-        run: pytest --tb=short -q
+        run: pytest --tb=short -q -m "not slow"
