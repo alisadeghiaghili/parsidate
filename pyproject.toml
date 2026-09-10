@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parsidate"
-version = "0.13.0"
+version = "0.14.0"
 description = "Persian (Jalali/Solar Hijri) and Gregorian date toolkit for Python, inspired by R's lubridate"
 readme = "README.md"
 authors = [
@@ -50,13 +50,16 @@ dimdate = [
     "pandas>=1.5.0",
     "numpy>=1.21.0",
 ]
+vector = [
+    "numpy>=1.21.0",
+]
 docs = [
     "sphinx>=5.0",
     "sphinx-rtd-theme>=1.0",
     "myst-parser>=0.18",
 ]
 all = [
-    "parsidate[dev,dimdate,docs]"
+    "parsidate[dev,dimdate,docs,vector]"
 ]
 
 [project.urls]

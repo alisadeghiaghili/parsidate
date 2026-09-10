@@ -7,7 +7,7 @@
 **Date/time toolkit for Persian (Jalali/Solar Hijri) and Gregorian calendars.**
 Inspired by R's [lubridate](https://lubridate.tidyverse.org) package.
 
-Status: **0.13.0 (beta)** — Iranian business calendar (holidays + networkdays).  
+Status: **0.14.0 (beta)** — vectorized conversion + business calendar.  
 Roadmap: [ROADMAP.md](ROADMAP.md).
 
 ---
@@ -15,7 +15,7 @@ Roadmap: [ROADMAP.md](ROADMAP.md).
 ## ✨ Features
 
 - **Jalali (Persian) & Gregorian** date support
-- **Conversion** between calendars
+- **Conversion** between calendars (scalar + NumPy vectorized)
 - **Date parsing & formatting** with **Python-standard `strftime` codes**
 - **Date arithmetic** (add/subtract days, weeks, months, years, intervals)
 - **Business days**: `networkdays`, `add_business_days`, Iranian official holidays
