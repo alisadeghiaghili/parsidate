@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.10.0] - 2024-11-09
+
+### Changed
+- Timezone stack migrated from `pytz` to stdlib `zoneinfo` (Python 3.9+)
+- Runtime dependencies removed (stdlib only for core; pandas optional for dimdate)
+- `Duration` stores integer microseconds with total ordering and exact equality
+- `intervals.arithmetic` is a thin re-export of `operations.arithmetic`
+
+### Added
+- GitHub Actions CI matrix (Python 3.9-3.13)
+- P1 architecture regression tests
+
 ## [0.9.0] - 2024-11-09
 
 ### Fixed

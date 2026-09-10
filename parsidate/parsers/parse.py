@@ -5,13 +5,19 @@ Copyright (C) 2024 Ali Sadeghi Aghili
 Licensed under GPL-3.0-or-later
 """
 
-import pytz
+import re
+from datetime import datetime
+from typing import Optional, Union
+from zoneinfo import ZoneInfo
+
 from parsidate.core.jalali import JalaliDate
 from parsidate.core.gregorian import GregorianDate
 from parsidate.utils.helpers import normalize_date_separator, to_english_digits
-from typing import Optional, Union
-from datetime import datetime
-import re
+
+
+def _tzinfo_for(tz: Optional[str]):
+    """Return ZoneInfo for a name, or None when tz is omitted."""
+    return ZoneInfo(tz) if tz else None
 
 # === Jalali Parsers ===
 
@@ -19,21 +25,21 @@ def jmd(date_str: str, tz: Optional[str] = None) -> JalaliDate:
     """Parse a Persian date string in Year/Month/Day format: '1403/08/18'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     y, m, d = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(y, m, d, tzinfo=tzinfo)
 
 def jdm(date_str: str, tz: Optional[str] = None) -> JalaliDate:
     """Parse Day/Month/Year: '18/08/1403'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     d, m, y = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(y, m, d, tzinfo=tzinfo)
 
 def jmdy(date_str: str, tz: Optional[str] = None) -> JalaliDate:
     """Parse Month/Day/Year: '08/18/1403'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     m, d, y = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(y, m, d, tzinfo=tzinfo)
 
 def jdmy(date_str: str, tz: Optional[str] = None) -> JalaliDate:
@@ -56,7 +62,7 @@ def jmd_hms(date_str: str, tz: Optional[str] = None) -> JalaliDate:
         h, mi, se = map(int, parts[1].split(":"))
     else:
         h, mi, se = 0, 0, 0
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(y, m, d, h, mi, se, 0, tzinfo)
 
 # === Gregorian Parsers ===
@@ -65,28 +71,28 @@ def ymd(date_str: str, tz: Optional[str] = None) -> GregorianDate:
     """Parse Year-Month-Day: '2024-11-08' or '2024/11/08'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     y, m, d = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, tzinfo=tzinfo)
 
 def dmy(date_str: str, tz: Optional[str] = None) -> GregorianDate:
     """Parse Day-Month-Year: '08-11-2024'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     d, m, y = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, tzinfo=tzinfo)
 
 def mdy(date_str: str, tz: Optional[str] = None) -> GregorianDate:
     """Parse Month-Day-Year: '11-08-2024'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     m, d, y = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, tzinfo=tzinfo)
 
 def ydm(date_str: str, tz: Optional[str] = None) -> GregorianDate:
     """Parse Year-Day-Month: '2024-08-11'."""
     s = to_english_digits(normalize_date_separator(date_str)).strip()
     y, d, m = map(int, s.split("/"))
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, tzinfo=tzinfo)
 
 def ymd_hms(date_str: str, tz: Optional[str] = None) -> GregorianDate:
@@ -105,7 +111,7 @@ def ymd_hms(date_str: str, tz: Optional[str] = None) -> GregorianDate:
         h, mi, se = map(int, parts[1].split(":"))
     else:
         h, mi, se = 0, 0, 0
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, h, mi, se, 0, tzinfo)
 
 
@@ -136,14 +142,14 @@ def parse_date(date_str: str, calendar: Optional[str] = None, tz: Optional[str] 
 
 def now_jalali(tz: Optional[str] = None) -> JalaliDate:
     """Get current Jalali date/time with optional timezone."""
-    dt = datetime.now(pytz.timezone(tz)) if tz else datetime.now()
+    dt = datetime.now(ZoneInfo(tz)) if tz else datetime.now()
     from parsidate.core.converters import gregorian_to_jalali
     jy, jm, jd = gregorian_to_jalali(dt.year, dt.month, dt.day)
     return JalaliDate(jy, jm, jd, dt.hour, dt.minute, dt.second, dt.microsecond, dt.tzinfo)
 
 def now_gregorian(tz: Optional[str] = None) -> GregorianDate:
     """Get current Gregorian date/time with optional timezone."""
-    dt = datetime.now(pytz.timezone(tz)) if tz else datetime.now()
+    dt = datetime.now(ZoneInfo(tz)) if tz else datetime.now()
     return GregorianDate(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond, dt.tzinfo)
 
 def today_jalali(tz: Optional[str] = None) -> JalaliDate:
@@ -235,7 +241,7 @@ def strptime_jalali(
     hour = int(fields.get("hour") or 0)
     minute = int(fields.get("minute") or 0)
     second = int(fields.get("second") or 0)
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(year, month, day, hour, minute, second, 0, tzinfo)
 
 
@@ -272,7 +278,7 @@ def strptime_gregorian(
     hour = int(fields.get("hour") or 0)
     minute = int(fields.get("minute") or 0)
     second = int(fields.get("second") or 0)
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(year, month, day, hour, minute, second, 0, tzinfo)
 
 
@@ -317,7 +323,7 @@ def parse_jalali(date_str: str, tz: Optional[str] = None) -> JalaliDate:
         y, m, d = map(int, s.split("/"))
         h, mi, se = 0, 0, 0
 
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return JalaliDate(y, m, d, h, mi, se, 0, tzinfo)
 
 
@@ -362,5 +368,5 @@ def parse_gregorian(date_str: str, tz: Optional[str] = None) -> GregorianDate:
         y, m, d = map(int, s.split("/"))
         h, mi, se = 0, 0, 0
 
-    tzinfo = pytz.timezone(tz) if tz else None
+    tzinfo = _tzinfo_for(tz)
     return GregorianDate(y, m, d, h, mi, se, 0, tzinfo)

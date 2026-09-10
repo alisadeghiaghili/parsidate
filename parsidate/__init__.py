@@ -2,7 +2,7 @@
 ParsiDate: Comprehensive Persian/Gregorian Date Toolkit for Python.
 """
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 __author__ = "Ali Sadeghi Aghili"
 __email__ = "alisadeghiaghili@gmail.com"
 __license__ = "GPL-3.0-or-later"

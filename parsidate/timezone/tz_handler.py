@@ -1,164 +1,242 @@
-"""
-Timezone helper functions for ParsiDate.
+"""Timezone helpers for ParsiDate using the standard library ``zoneinfo``.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
 Licensed under GPL-3.0-or-later
 """
 
-import pytz
-from datetime import timezone as dt_timezone, timedelta
-from typing import Union
+from __future__ import annotations
 
-def get_timezone(name: str):
-    """
-    Get pytz timezone object from name (e.g. 'Asia/Tehran', 'UTC').
+from datetime import datetime, timezone as dt_timezone
+from typing import Any, List
+from zoneinfo import ZoneInfo
+
+
+def get_timezone(name: str) -> ZoneInfo:
+    """Return a ``ZoneInfo`` timezone by IANA name.
+
+    Args:
+        name: IANA zone name, e.g. ``\"Asia/Tehran\"`` or ``\"UTC\"``.
+
+    Returns:
+        ``zoneinfo.ZoneInfo`` instance.
+
+    Raises:
+        ValueError: If the zone name is unknown.
+
+    Example:
+        >>> get_timezone(\"UTC\").key
+        'UTC'
     """
     try:
-        return pytz.timezone(name)
-    except Exception as e:
-        raise ValueError(f"Invalid timezone: {name}") from e
+        return ZoneInfo(name)
+    except Exception as exc:
+        raise ValueError(f"Invalid timezone: {name}") from exc
 
-def localize_datetime(dt, tz_name: str):
-    """
-    Attach timezone info to naive datetime object (pytz style).
 
-    Args:
-        dt: datetime object (naive).
-        tz_name: Timezone string.
-
-    Returns:
-        Aware datetime object.
-    """
-    tz = get_timezone(tz_name)
-    return tz.localize(dt)
-
-def convert_timezone(dt, to_tz: str):
-    """
-    Convert a datetime object with tzinfo to another timezone.
+def localize_datetime(dt: datetime, tz_name: str) -> datetime:
+    """Attach a timezone to a naive datetime.
 
     Args:
-        dt: datetime object (must have tzinfo).
-        to_tz: Target timezone string.
+        dt: Naive ``datetime``.
+        tz_name: IANA zone name.
 
     Returns:
-        datetime in new timezone.
+        Aware datetime in ``tz_name``.
+
+    Raises:
+        ValueError: If ``dt`` already has tzinfo.
+
+    Example:
+        >>> localize_datetime(datetime(2024, 1, 1, 12, 0), \"UTC\").tzinfo.key
+        'UTC'
+    """
+    if dt.tzinfo is not None:
+        raise ValueError("datetime is already timezone-aware")
+    return dt.replace(tzinfo=get_timezone(tz_name))
+
+
+def convert_timezone(dt: datetime, to_tz: str) -> datetime:
+    """Convert an aware datetime into another timezone.
+
+    Args:
+        dt: Aware ``datetime``.
+        to_tz: Target IANA zone name.
+
+    Returns:
+        Datetime expressed in ``to_tz``.
+
+    Raises:
+        ValueError: If ``dt`` is naive.
+
+    Example:
+        >>> aware = datetime(2024, 1, 1, 12, 0, tzinfo=dt_timezone.utc)
+        >>> convert_timezone(aware, \"UTC\").hour
+        12
     """
     if dt.tzinfo is None:
         raise ValueError("Input datetime must have tzinfo.")
-    tz = get_timezone(to_tz)
-    return dt.astimezone(tz)
+    return dt.astimezone(get_timezone(to_tz))
 
-def remove_timezone(dt):
-    """
-    Return datetime object without timezone info (naive).
+
+def remove_timezone(dt: datetime) -> datetime:
+    """Return a naive datetime with the same wall-clock fields.
+
+    Args:
+        dt: Any ``datetime``.
+
+    Returns:
+        Naive datetime (tzinfo stripped, clock fields unchanged).
+
+    Example:
+        >>> remove_timezone(datetime(2024, 1, 1, tzinfo=dt_timezone.utc)).tzinfo is None
+        True
     """
     return dt.replace(tzinfo=None)
 
+
 def utc_offset_minutes(tz_name: str) -> int:
-    """Get UTC offset in minutes for a timezone (relative to now).
+    """Return the UTC offset in minutes for a zone at the current instant.
 
     Args:
-        tz_name: Timezone string.
+        tz_name: IANA zone name.
 
     Returns:
-        UTC offset in minutes (int).
+        Offset east of UTC in minutes (negative west).
+
+    Example:
+        >>> isinstance(utc_offset_minutes(\"UTC\"), int)
+        True
     """
-    import datetime as _dt
     tz = get_timezone(tz_name)
-    naive_now = _dt.datetime.now()
-    offset = tz.utcoffset(naive_now)
+    now = datetime.now(tz)
+    offset = now.utcoffset()
+    if offset is None:
+        return 0
     return int(offset.total_seconds() // 60)
 
-def is_dst(dt, tz_name: str) -> bool:
+
+def is_dst(dt: datetime, tz_name: str) -> bool:
     """Return whether a datetime falls in daylight saving time.
 
     Args:
         dt: Naive or aware ``datetime``.
-        tz_name: IANA timezone name such as ``\"Asia/Tehran\"``.
+        tz_name: IANA zone name.
 
     Returns:
-        ``True`` if the datetime is in DST for that zone.
+        ``True`` if the datetime observes DST in that zone.
 
     Example:
-        >>> from datetime import datetime
-        >>> is_dst(datetime(2024, 7, 1, 12, 0), "UTC")
+        >>> is_dst(datetime(2024, 7, 1, 12, 0), \"UTC\")
         False
     """
     tz = get_timezone(tz_name)
     if dt.tzinfo is None:
-        dt = tz.localize(dt)
+        dt = dt.replace(tzinfo=tz)
+    else:
+        dt = dt.astimezone(tz)
     return bool(dt.dst())
 
-def list_timezones():
-    """
-    List all timezone names available in pytz.
-    """
-    return pytz.all_timezones
 
-def with_tz(date, tz: str):
-    """
-    Convert a date to a different timezone (changes the time).
-
-    This converts the date/time to a different timezone, adjusting the
-    hour/minute/second values to match the new timezone.
-
-    Args:
-        date: JalaliDate or GregorianDate with tzinfo
-        tz: Target timezone name (e.g., 'UTC', 'Asia/Tehran')
+def list_timezones() -> List[str]:
+    """List available IANA timezone names from ``zoneinfo``.
 
     Returns:
-        New date object in the target timezone
+        Sorted list of zone keys available on this system.
 
     Example:
-        date_tehran = jmd_hms("1403/08/18 14:30:00", tz="Asia/Tehran")
-        date_utc = with_tz(date_tehran, "UTC")  # Converts to UTC time
+        >>> \"UTC\" in list_timezones()
+        True
     """
-    from datetime import datetime
+    try:
+        from zoneinfo import available_timezones
 
-    # Create datetime from date object
-    dt = datetime(
-        date.year() if hasattr(date, 'year') else date.year,
-        date.month() if hasattr(date, 'month') else date.month,
-        date.day() if hasattr(date, 'day') else date.day,
-        date.hour() if hasattr(date, 'hour') else 0,
-        date.minute() if hasattr(date, 'minute') else 0,
-        date.second() if hasattr(date, 'second') else 0,
-        date.microsecond() if hasattr(date, 'microsecond') else 0,
-        tzinfo=date.tzinfo() if hasattr(date, 'tzinfo') else None
-    )
-
-    # Convert timezone
-    new_dt = convert_timezone(dt, tz)
-
-    # Create new date object with same type
-    new_date = date.copy()
-    return new_date.replace(
-        hour=new_dt.hour,
-        minute=new_dt.minute,
-        second=new_dt.second,
-        microsecond=new_dt.microsecond,
-        tzinfo=new_dt.tzinfo
-    )
+        return sorted(available_timezones())
+    except Exception:  # pragma: no cover - fallback
+        return ["UTC"]
 
 
-def force_tz(date, tz: str):
-    """
-    Force a timezone onto a date without converting the time.
+def _date_parts(date: Any):
+    """Extract Y/M/D/h/m/s/us/tz from a date-like object."""
+    year = date.year() if hasattr(date, "year") else date.year
+    month = date.month() if hasattr(date, "month") else date.month
+    day = date.day() if hasattr(date, "day") else date.day
+    hour = date.hour() if hasattr(date, "hour") else 0
+    minute = date.minute() if hasattr(date, "minute") else 0
+    second = date.second() if hasattr(date, "second") else 0
+    microsecond = date.microsecond() if hasattr(date, "microsecond") else 0
+    tz = date.tzinfo() if hasattr(date, "tzinfo") else getattr(date, "tzinfo", None)
+    return year, month, day, hour, minute, second, microsecond, tz
 
-    This sets the timezone but keeps the hour/minute/second values the same.
-    Useful when you have a naive date and want to assign it a timezone.
+
+def with_tz(date: Any, tz: str) -> Any:
+    """Convert a date object into another timezone (clock fields change).
 
     Args:
-        date: JalaliDate or GregorianDate (can be naive or aware)
-        tz: Timezone name to assign (e.g., 'UTC', 'Asia/Tehran')
+        date: ``JalaliDate`` or ``GregorianDate`` with optional tzinfo.
+        tz: Target IANA zone name.
 
     Returns:
-        New date object with the specified timezone
+        New date object of the same type in the target zone.
 
     Example:
-        date = jmd_hms("1403/08/18 14:30:00")  # Naive
-        date_tehran = force_tz(date, "Asia/Tehran")  # Same time, but with TZ
+        >>> from parsidate.parsers import jmd_hms
+        >>> d = jmd_hms(\"1403/08/18 14:30:00\", tz=\"Asia/Tehran\")
+        >>> with_tz(d, \"UTC\").tzinfo() is not None
+        True
     """
-    tz_obj = get_timezone(tz)
-    return date.replace(tzinfo=tz_obj)
+    y, mo, d, h, mi, s, us, current_tz = _date_parts(date)
+    if current_tz is None:
+        raise ValueError("Input date must have tzinfo to convert zones.")
+    # Jalali wall-clock cannot be shifted via Gregorian fields alone;
+    # convert via Gregorian datetime for GregorianDate, and via
+    # to_gregorian for JalaliDate.
+    from parsidate.core.jalali import JalaliDate
 
+    if isinstance(date, JalaliDate):
+        gy, gm, gd = date.to_gregorian()
+        src = datetime(gy, gm, gd, h, mi, s, us, tzinfo=current_tz)
+        shifted = convert_timezone(src, tz)
+        from parsidate.core.converters import gregorian_to_jalali
+
+        jy, jm, jd = gregorian_to_jalali(shifted.year, shifted.month, shifted.day)
+        return JalaliDate(
+            jy,
+            jm,
+            jd,
+            shifted.hour,
+            shifted.minute,
+            shifted.second,
+            shifted.microsecond,
+            shifted.tzinfo,
+        )
+
+    src = datetime(y, mo, d, h, mi, s, us, tzinfo=current_tz)
+    shifted = convert_timezone(src, tz)
+    return date.replace(
+        year=shifted.year,
+        month=shifted.month,
+        day=shifted.day,
+        hour=shifted.hour,
+        minute=shifted.minute,
+        second=shifted.second,
+        microsecond=shifted.microsecond,
+        tzinfo=shifted.tzinfo,
+    )
+
+
+def force_tz(date: Any, tz: str) -> Any:
+    """Attach a timezone without changing clock fields.
+
+    Args:
+        date: ``JalaliDate`` or ``GregorianDate``.
+        tz: IANA zone name to assign.
+
+    Returns:
+        New date object with ``tz`` attached.
+
+    Example:
+        >>> from parsidate.parsers import jmd
+        >>> force_tz(jmd(\"1403/08/18\"), \"Asia/Tehran\").tzinfo() is not None
+        True
+    """
+    return date.replace(tzinfo=get_timezone(tz))
