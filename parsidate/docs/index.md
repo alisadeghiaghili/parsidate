@@ -59,7 +59,7 @@ Welcome to the official documentation for **ParsiDate**, a comprehensive Python 
 ## Contribution & License
 
 - Contributions welcome via GitHub Pull Requests
-- License: GNU GPL v3
+- License: Apache License 2.0
 - Maintainer: Ali Sadeghi Aghili (alisadeghiaghili@gmail.com)
 
 ---

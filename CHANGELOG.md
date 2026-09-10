@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.11.0] - 2024-11-09
+
+### Changed
+- Project license moved from GPL-3.0-or-later to **Apache-2.0**
+- `Period` is immutable; `total_days()` replaced by explicit
+  `fixed_days()` and `approx_days()` helpers
+- `ATTRIBUTION.md` rewritten to match actual Apache-2.0 obligations
+- Added `NOTICE` file
+
+### Notes
+- Conversion algorithms are published Solar Hijri arithmetic.
+  Historical GPL implementations are acknowledged for provenance only.
+
 ## [0.10.0] - 2024-11-09
 
 ### Changed

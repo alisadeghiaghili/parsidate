@@ -2,20 +2,8 @@
 JalaliDate: Persian (Solar Hijri) calendar date class.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Portions of this software are inspired by or derived from:
-- jalali (https://github.com/shobeiry/jalali) - GPL v3
-- lubridate (https://lubridate.tidyverse.org) - GPL
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Licensed under the Apache License, Version 2.0
+See the LICENSE file in the project root.
 """
 
 from datetime import datetime, timezone as dt_timezone, tzinfo

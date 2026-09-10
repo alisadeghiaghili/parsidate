@@ -112,7 +112,7 @@ Ali Sadeghi Aghili (alisadeghiaghili@gmail.com)
 
 ### 13. License
 
-GNU General Public License v3.0 or later.
+Apache License, Version 2.0.
 
 ---
 

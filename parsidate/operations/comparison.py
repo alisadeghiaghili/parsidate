@@ -2,7 +2,7 @@
 Comparison operations for JalaliDate and GregorianDate.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Licensed under the Apache License, Version 2.0
 """
 
 def eq(date1, date2) -> bool:

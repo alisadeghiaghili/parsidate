@@ -115,4 +115,4 @@ For help, create an issue on the GitHub repository or contact the maintainer at 
 
 ---
 
-Ali Sadeghi Aghili | 2025 | ParsiDate GPLv3
+Ali Sadeghi Aghili | 2025 | ParsiDate Apache-2.0

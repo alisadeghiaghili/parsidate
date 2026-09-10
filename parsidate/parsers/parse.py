@@ -2,7 +2,7 @@
 Date parsing functions and shortcuts for Jalali (Persian) and Gregorian calendars.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
-Licensed under GPL-3.0-or-later
+Licensed under the Apache License, Version 2.0
 """
 
 import re

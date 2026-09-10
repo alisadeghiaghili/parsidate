@@ -148,4 +148,4 @@ gdate = GregorianDate(2024, 11, 10, 10, 45)
 
 ---
 
-Ali Sadeghi Aghili 2025 | GPL v3
+Ali Sadeghi Aghili 2025 | Apache-2.0
