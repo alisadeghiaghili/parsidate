@@ -6,7 +6,14 @@ Licensed under GPL-3.0-or-later
 """
 
 from typing import Optional, List, Literal
-import pandas as pd
+
+try:
+    import pandas as pd
+except ImportError as exc:  # pragma: no cover
+    raise ImportError(
+        "parsidate.dimdate requires pandas. Install with: pip install parsidate[dimdate]"
+    ) from exc
+
 from datetime import datetime
 
 def date_range(start, end, step_days: int = 1):
@@ -24,7 +31,7 @@ def date_range(start, end, step_days: int = 1):
     current = start.copy()
     while current <= end:
         yield current.copy()
-        current.add(days=step_days)
+        current = current.add(days=step_days)
 
 def month_range(start, end):
     """
@@ -38,10 +45,10 @@ def month_range(start, end):
         Date objects at first day of each month from start to end.
     """
     from parsidate.operations.arithmetic import add_months
-    current = start.copy().day(1)
+    current = start.replace(day=1)
     while current <= end:
         yield current.copy()
-        current = add_months(current, 1).day(1)
+        current = add_months(current, 1).replace(day=1)
 
 def year_range(start, end):
     """
@@ -55,10 +62,10 @@ def year_range(start, end):
         Date objects at first day of each year from start to end.
     """
     from parsidate.operations.arithmetic import add_years
-    current = start.copy().month(1).day(1)
+    current = start.replace(month=1, day=1)
     while current <= end:
         yield current.copy()
-        current = add_years(current, 1).month(1).day(1)
+        current = add_years(current, 1).replace(month=1, day=1)
 
 def custom_range(start, end, days=0, months=0, years=0):
     """
@@ -185,8 +192,10 @@ def generate_dim_date(
         # Date key (YYYYMMDD format)
         date_key = year * 10000 + month * 100 + day
 
-        # Full date string
-        full_date = current.format("Y/m/d" if calendar == "jalali" else "Y-m-d", "en")
+        # Standard strftime codes (Python strptime/strftime compatible)
+        full_date = current.strftime(
+            "%Y/%m/%d" if calendar == "jalali" else "%Y-%m-%d", "en"
+        )
 
         # Quarter
         quarter = current.quarter()
@@ -267,7 +276,7 @@ def generate_dim_date(
         dates_data.append(row)
 
         # Move to next day
-        current.add(days=1)
+        current = current.add(days=1)
 
     # Create DataFrame
     df = pd.DataFrame(dates_data)

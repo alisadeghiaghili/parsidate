@@ -149,12 +149,132 @@ def now_gregorian(tz: Optional[str] = None) -> GregorianDate:
 def today_jalali(tz: Optional[str] = None) -> JalaliDate:
     """Get today Jalali date with zeroed time and optional timezone."""
     n = now_jalali(tz)
-    return n.copy().hour(0).minute(0).second(0).microsecond(0)
+    return n.replace(hour=0, minute=0, second=0, microsecond=0)
 
 def today_gregorian(tz: Optional[str] = None) -> GregorianDate:
     """Get today Gregorian date with zeroed time and optional timezone."""
     n = now_gregorian(tz)
-    return n.copy().hour(0).minute(0).second(0).microsecond(0)
+    return n.replace(hour=0, minute=0, second=0, microsecond=0)
+
+# === Standard strptime-style parsers ===
+
+_STRPTIME_FIELD_PATTERN = {
+    "%Y": r"(?P<year>\d{4})",
+    "%y": r"(?P<year2>\d{2})",
+    "%m": r"(?P<month>\d{1,2})",
+    "%d": r"(?P<day>\d{1,2})",
+    "%H": r"(?P<hour>\d{1,2})",
+    "%M": r"(?P<minute>\d{1,2})",
+    "%S": r"(?P<second>\d{1,2})",
+}
+
+
+def _compile_strptime_regex(fmt: str) -> re.Pattern:
+    """Compile a strptime-style format into a named-group regex.
+
+    Only the numeric directives used by ParsiDate are supported:
+    ``%Y %y %m %d %H %M %S``. Literal characters are escaped.
+
+    Args:
+        fmt: Format string such as ``\"%Y/%m/%d\"``.
+
+    Returns:
+        Compiled regular expression with named groups.
+
+    Example:
+        >>> _compile_strptime_regex(\"%Y/%m/%d\").pattern
+        '(?P<year>\\\\d{4})/(?P<month>\\\\d{1,2})/(?P<day>\\\\d{1,2})'
+    """
+    parts = []
+    i = 0
+    while i < len(fmt):
+        if fmt[i] == "%" and i + 1 < len(fmt):
+            token = fmt[i : i + 2]
+            if token in _STRPTIME_FIELD_PATTERN:
+                parts.append(_STRPTIME_FIELD_PATTERN[token])
+                i += 2
+                continue
+            raise ValueError(f"Unsupported strptime directive: {token}")
+        parts.append(re.escape(fmt[i]))
+        i += 1
+    return re.compile("".join(parts))
+
+
+def strptime_jalali(
+    date_str: str,
+    fmt: str = "%Y/%m/%d",
+    tz: Optional[str] = None,
+) -> JalaliDate:
+    """Parse a Jalali date using standard ``strptime`` format codes.
+
+    Args:
+        date_str: Input string (Persian or English digits).
+        fmt: ``strptime`` format. Supported codes: ``%Y %y %m %d %H %M %S``.
+        tz: Optional IANA timezone name.
+
+    Returns:
+        Parsed :class:`~parsidate.core.jalali.JalaliDate`.
+
+    Raises:
+        ValueError: If the string does not match ``fmt``.
+
+    Example:
+        >>> strptime_jalali(\"1403/08/18\", \"%Y/%m/%d\").day()
+        18
+        >>> strptime_jalali(\"18-08-1403\", \"%d-%m-%Y\").year()
+        1403
+    """
+    s = to_english_digits(date_str).strip()
+    match = _compile_strptime_regex(fmt).fullmatch(s)
+    if not match:
+        raise ValueError(f"Date string {date_str!r} does not match format {fmt!r}")
+    fields = match.groupdict()
+    year = int(fields["year"]) if fields.get("year") else 2000 + int(fields["year2"])
+    month = int(fields.get("month") or 1)
+    day = int(fields.get("day") or 1)
+    hour = int(fields.get("hour") or 0)
+    minute = int(fields.get("minute") or 0)
+    second = int(fields.get("second") or 0)
+    tzinfo = pytz.timezone(tz) if tz else None
+    return JalaliDate(year, month, day, hour, minute, second, 0, tzinfo)
+
+
+def strptime_gregorian(
+    date_str: str,
+    fmt: str = "%Y-%m-%d",
+    tz: Optional[str] = None,
+) -> GregorianDate:
+    """Parse a Gregorian date using standard ``strptime`` format codes.
+
+    Args:
+        date_str: Input string (Persian or English digits).
+        fmt: ``strptime`` format. Supported codes: ``%Y %y %m %d %H %M %S``.
+        tz: Optional IANA timezone name.
+
+    Returns:
+        Parsed :class:`~parsidate.core.gregorian.GregorianDate`.
+
+    Raises:
+        ValueError: If the string does not match ``fmt``.
+
+    Example:
+        >>> strptime_gregorian(\"2024-11-08\", \"%Y-%m-%d\").month()
+        11
+    """
+    s = to_english_digits(date_str).strip()
+    match = _compile_strptime_regex(fmt).fullmatch(s)
+    if not match:
+        raise ValueError(f"Date string {date_str!r} does not match format {fmt!r}")
+    fields = match.groupdict()
+    year = int(fields["year"]) if fields.get("year") else 2000 + int(fields["year2"])
+    month = int(fields.get("month") or 1)
+    day = int(fields.get("day") or 1)
+    hour = int(fields.get("hour") or 0)
+    minute = int(fields.get("minute") or 0)
+    second = int(fields.get("second") or 0)
+    tzinfo = pytz.timezone(tz) if tz else None
+    return GregorianDate(year, month, day, hour, minute, second, 0, tzinfo)
+
 
 def parse_jalali(date_str: str, tz: Optional[str] = None) -> JalaliDate:
     """
