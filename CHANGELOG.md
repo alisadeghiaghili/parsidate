@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.14.0] - 2024-11-09
+
+### Added
+- `parsidate.vector`: NumPy array conversion
+  - `to_jalali_ymd` / `to_gregorian_ymd`
+  - `gregorian_ordinal` / `jalali_from_ordinal`
+- Extra: `pip install parsidate[vector]` (numpy)
+
+### Notes
+- Scalar and vector converters must match exactly (parity tests).
+- Optional import: core package does not require numpy.
+
 ## [0.13.0] - 2024-11-09
 
 ### Added
