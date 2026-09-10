@@ -6,12 +6,25 @@ Licensed under GPL-3.0-or-later
 """
 
 from typing import Any, Literal
-from parsidate.utils.helpers import (
-    month_name,
-    weekday_name,
-    to_persian_digits,
-    to_english_digits,
+from parsidate.formatting.locales import (
+    get_month_name,
+    get_weekday_name,
+    PERSIAN_DIGITS,
+    ENGLISH_DIGITS
 )
+
+
+def to_persian_digits(text: str) -> str:
+    """Convert English digits to Persian."""
+    trans = str.maketrans(ENGLISH_DIGITS, PERSIAN_DIGITS)
+    return text.translate(trans)
+
+
+def to_english_digits(text: str) -> str:
+    """Convert Persian digits to English."""
+    trans = str.maketrans(PERSIAN_DIGITS, ENGLISH_DIGITS)
+    return text.translate(trans)
+
 
 def format_jalali_date(
     date: Any,
@@ -19,59 +32,92 @@ def format_jalali_date(
     locale: Literal["fa", "en"] = "fa"
 ) -> str:
     """
-    Flexible formatter for JalaliDate objects.
-    Pattern codes:
-        Y - 4-digit year (1399)
-        y - 2-digit year (99)
-        m - month with leading zero (01-12)
-        n - month no leading zero (1-12)
-        d - day with leading zero (01-31)
-        j - day no leading zero (1-31)
-        H - hour with leading zero (00-23)
-        i - minute with leading zero (00-59)
-        s - second with leading zero (00-59)
-        E - full month name
-        M - short month name (3 letters, e.g., Far/Mar)
-        l - full weekday name
-        w - weekday number (0=Saturday)
-        q - quarter (1-4)
-        L - is leap year (1/0)
+    Format JalaliDate using strftime-style format codes.
+
+    Format codes (compatible with Python's strftime):
+        %Y - 4-digit year (1402)
+        %y - 2-digit year (02)
+        %m - month with leading zero (01-12)
+        %d - day with leading zero (01-31)
+        %H - hour with leading zero (00-23)
+        %I - hour 12-hour format (01-12)
+        %M - minute with leading zero (00-59)
+        %S - second with leading zero (00-59)
+        %f - microsecond (000000-999999)
+        %p - AM/PM (for 12-hour format)
+        %B - full month name (Farvardin, فروردین)
+        %b - abbreviated month name (Far, فرو)
+        %A - full weekday name (Shanbe, شنبه)
+        %a - abbreviated weekday name (Sha, ش)
+        %w - weekday as number (0=Saturday)
+        %j - day of year (001-366)
+        %U - week number (00-53)
+        %% - literal %
+
+        Non-standard extensions:
+        %-m - month without leading zero (1-12)
+        %-d - day without leading zero (1-31)
+        %-H - hour without leading zero (0-23)
+        %-I - hour 12-hour without leading zero (1-12)
+        %-M - minute without leading zero (0-59)
+        %-S - second without leading zero (0-59)
+
+    Example:
+        >>> jdate = JalaliDate(1402, 8, 18, 14, 45, 30)
+        >>> jdate.strftime("%Y/%m/%d %H:%M:%S")
+        '1402/08/18 14:45:30'
+        >>> jdate.strftime("%A, %d %B %Y", locale="fa")
+        'سه‌شنبه، ۱۸ آبان ۱۴۰۲'
     """
+
+    # Helper for 12-hour format
+    hour_12 = date.hour() % 12
+    if hour_12 == 0:
+        hour_12 = 12
+    am_pm = "AM" if date.hour() < 12 else "PM"
+    if locale == "fa":
+        am_pm = "ق.ظ" if date.hour() < 12 else "ب.ظ"
+
+    # Map format codes to values
     values = {
-        "Y": str(date.year()).zfill(4),
-        "y": str(date.year() % 100).zfill(2),
-        "m": f"{date.month():02d}",
-        "n": str(date.month()),
-        "d": f"{date.day():02d}",
-        "j": str(date.day()),
-        "H": f"{date.hour():02d}",
-        "i": f"{date.minute():02d}",
-        "s": f"{date.second():02d}",
-        "E": month_name(date.month(), locale, "jalali"),
-        "M": month_name(date.month(), locale, "jalali")[:3],
-        "l": weekday_name(date.weekday(), locale, "jalali"),
-        "w": str(date.weekday()),
-        "q": str(date.quarter()),
-        "L": "1" if date.is_leap_year() else "0",
+        '%Y': lambda: str(date.year()).zfill(4),
+        '%y': lambda: str(date.year() % 100).zfill(2),
+        '%m': lambda: f"{date.month():02d}",
+        '%-m': lambda: str(date.month()),
+        '%d': lambda: f"{date.day():02d}",
+        '%-d': lambda: str(date.day()),
+        '%H': lambda: f"{date.hour():02d}",
+        '%-H': lambda: str(date.hour()),
+        '%I': lambda: f"{hour_12:02d}",
+        '%-I': lambda: str(hour_12),
+        '%M': lambda: f"{date.minute():02d}",
+        '%-M': lambda: str(date.minute()),
+        '%S': lambda: f"{date.second():02d}",
+        '%-S': lambda: str(date.second()),
+        '%f': lambda: f"{date.microsecond():06d}",
+        '%p': lambda: am_pm,
+        '%B': lambda: get_month_name(date.month(), locale, "jalali", short=False),
+        '%b': lambda: get_month_name(date.month(), locale, "jalali", short=True),
+        '%A': lambda: get_weekday_name(date.weekday(), locale, "jalali", short=False),
+        '%a': lambda: get_weekday_name(date.weekday(), locale, "jalali", short=True),
+        '%w': lambda: str(date.weekday()),
+        '%j': lambda: f"{date.day_of_year():03d}",
+        '%U': lambda: f"{((date.day_of_year() - 1) // 7):02d}",
+        '%%': lambda: '%',
     }
-    result = ""
-    esc = False
-    for c in pattern:
-        if esc:
-            result += c
-            esc = False
-            continue
-        if c == "\\":
-            esc = True
-            continue
-        if c in values:
-            val = values[c]
-            if locale == "fa" and c in ("Y", "y", "m", "n", "d", "j", "H", "i", "s", "w", "q", "L"):
-                val = to_persian_digits(val)
-            result += val
-        else:
-            result += c
+
+    # Replace format codes (process longer codes first: %-m before %m)
+    result = pattern
+    for code in sorted(values.keys(), key=len, reverse=True):
+        if code in result:
+            value = values[code]()
+            # Convert to Persian digits if needed
+            if locale == "fa" and code not in ('%B', '%b', '%A', '%a', '%%', '%p'):
+                value = to_persian_digits(value)
+            result = result.replace(code, value)
+
     return result
+
 
 def format_gregorian_date(
     date: Any,
@@ -79,41 +125,66 @@ def format_gregorian_date(
     locale: Literal["fa", "en"] = "en"
 ) -> str:
     """
-    Flexible formatter for GregorianDate objects.
-    Pattern codes same as for JalaliDate.
+    Format GregorianDate using strftime-style format codes.
+
+    Same format codes as format_jalali_date.
     """
+
+    # Helper for 12-hour format
+    hour_12 = date.hour() % 12
+    if hour_12 == 0:
+        hour_12 = 12
+    am_pm = "AM" if date.hour() < 12 else "PM"
+    if locale == "fa":
+        am_pm = "ق.ظ" if date.hour() < 12 else "ب.ظ"
+
     values = {
-        "Y": str(date.year()).zfill(4),
-        "y": str(date.year() % 100).zfill(2),
-        "m": f"{date.month():02d}",
-        "n": str(date.month()),
-        "d": f"{date.day():02d}",
-        "j": str(date.day()),
-        "H": f"{date.hour():02d}",
-        "i": f"{date.minute():02d}",
-        "s": f"{date.second():02d}",
-        "E": month_name(date.month(), locale, "gregorian"),
-        "M": month_name(date.month(), locale, "gregorian")[:3],
-        "l": weekday_name(date.weekday(), locale, "gregorian"),
-        "w": str(date.weekday()),
-        "q": str(date.quarter()),
-        "L": "1" if date.is_leap_year() else "0",
+        '%Y': lambda: str(date.year()).zfill(4),
+        '%y': lambda: str(date.year() % 100).zfill(2),
+        '%m': lambda: f"{date.month():02d}",
+        '%-m': lambda: str(date.month()),
+        '%d': lambda: f"{date.day():02d}",
+        '%-d': lambda: str(date.day()),
+        '%H': lambda: f"{date.hour():02d}",
+        '%-H': lambda: str(date.hour()),
+        '%I': lambda: f"{hour_12:02d}",
+        '%-I': lambda: str(hour_12),
+        '%M': lambda: f"{date.minute():02d}",
+        '%-M': lambda: str(date.minute()),
+        '%S': lambda: f"{date.second():02d}",
+        '%-S': lambda: str(date.second()),
+        '%f': lambda: f"{date.microsecond():06d}",
+        '%p': lambda: am_pm,
+        '%B': lambda: get_month_name(date.month(), locale, "gregorian", short=False),
+        '%b': lambda: get_month_name(date.month(), locale, "gregorian", short=True),
+        '%A': lambda: get_weekday_name(date.weekday(), locale, "gregorian", short=False),
+        '%a': lambda: get_weekday_name(date.weekday(), locale, "gregorian", short=True),
+        '%w': lambda: str(date.weekday()),
+        '%j': lambda: f"{date.day_of_year():03d}",
+        '%U': lambda: f"{((date.day_of_year() - 1) // 7):02d}",
+        '%%': lambda: '%',
     }
-    result = ""
-    esc = False
-    for c in pattern:
-        if esc:
-            result += c
-            esc = False
-            continue
-        if c == "\\":
-            esc = True
-            continue
-        if c in values:
-            val = values[c]
-            if locale == "fa" and c in ("Y", "y", "m", "n", "d", "j", "H", "i", "s", "w", "q", "L"):
-                val = to_persian_digits(val)
-            result += val
-        else:
-            result += c
+
+    result = pattern
+    for code in sorted(values.keys(), key=len, reverse=True):
+        if code in result:
+            value = values[code]()
+            if locale == "fa" and code not in ('%B', '%b', '%A', '%a', '%%', '%p'):
+                value = to_persian_digits(value)
+            result = result.replace(code, value)
+
     return result
+
+
+# Backward compatibility - keep old format codes if needed
+def format_date_custom(date: Any, pattern: str, locale: str = "fa") -> str:
+    """
+    Custom format function (alias for format_jalali_date or format_gregorian_date).
+
+    Deprecated: Use strftime method on date objects instead.
+    """
+    from parsidate.core.jalali import JalaliDate
+    if isinstance(date, JalaliDate):
+        return format_jalali_date(date, pattern, locale)
+    else:
+        return format_gregorian_date(date, pattern, locale)

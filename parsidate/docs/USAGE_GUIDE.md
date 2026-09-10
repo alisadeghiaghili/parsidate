@@ -38,29 +38,62 @@ date5 = parse_date("1402/08/19 12:51:20")
 
 ---
 
-## Formatting Dates
+## Formatting Dates (strftime)
+
+ParsiDate now uses Python-standard strftime format codes:
 
 ```python
-from parsidate.formatting import format_jalali_date, format_gregorian_date
+from parsidate.core import JalaliDate, GregorianDate
 
 jdate = JalaliDate(1402, 8, 19, 14, 15, 20)
 gdate = GregorianDate(2024, 11, 10, 14, 15, 20)
 
-print(format_jalali_date(jdate))
-print(format_gregorian_date(gdate))
-print(jdate.format("Y/m/d H:i:s"))
-print(gdate.format("Y-m-d H:i"))
+# Basic formatting
+print(jdate.strftime("%Y/%m/%d %H:%M:%S"))       # 1402/08/19 14:15:20
+print(gdate.strftime("%Y-%m-%d %H:%M:%S"))       # 2024-11-10 14:15:20
+
+# With month/weekday names (English)
+print(jdate.strftime("%A, %B %d, %Y", locale="en"))  
+# Seshanbe, Aban 19, 1402
+
+# With month/weekday names (Farsi)
+print(jdate.strftime("%A، %d %B %Y", locale="fa"))   
+# سه‌شنبه، ۱۹ آبان ۱۴۰۲
+
+# 12-hour format
+print(jdate.strftime("%I:%M %p", locale="fa"))   # ۰۲:۱۵ ب.ظ
+
+# ISO-style
+print(jdate.strftime("%Y-%m-%d"))                # 1402-08-19
+
+# Custom formats
+print(jdate.strftime("%y/%m/%d"))                # 02/08/19
+print(jdate.strftime("%d/%m/%Y"))                # 19/08/1402
 ```
 
-Alternate formats:
+### Available Format Codes
 
-```python
-from parsidate.formatting import format_full, format_short, format_iso, format_date_custom
+```
+%Y - 4-digit year (1402, 2024)
+%y - 2-digit year (02, 24)
+%m - month with leading zero (01-12)
+%d - day with leading zero (01-31)
+%H - hour 24-hour format (00-23)
+%I - hour 12-hour format (01-12)
+%M - minute (00-59)
+%S - second (00-59)
+%f - microsecond (000000-999999)
+%p - AM/PM indicator
+%B - full month name (Farvardin/January, فروردین/ژانویه)
+%b - abbreviated month name (Far/Jan, فرو/ژان)
+%A - full weekday name (Shanbe/Monday, شنبه/دوشنبه)
+%a - abbreviated weekday name (Sha/Mon, ش/د)
+%w - weekday as number
+%j - day of year
+%% - literal %
 
-print(format_full(jdate, locale="fa"))
-print(format_short(gdate, locale="en"))
-print(format_iso(jdate))
-print(format_date_custom(gdate, "Y-m-d H:i:s", locale="en"))
+# Without leading zeros:
+%-m, %-d, %-H, %-I, %-M, %-S
 ```
 
 ---
