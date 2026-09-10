@@ -1,17 +1,15 @@
 # ParsiDate Roadmap
 
-**Status:** planning only — **no phase below is implemented yet**.
-Shipped code lives on `main` up to **0.12.0**. Everything under R1–R5 is
-scheduled for **future versions**.
+**Status:** R1 (business calendar) shipped in **0.13.0**. R2–R5 remain planned.
 
 **Positioning:** analytics-ready Persian (Solar Hijri) calendar toolkit for
 data warehouses, pipelines, and Industry 4.0 reporting — not another thin
 `jdatetime` clone.
 
-**Current version:** 0.12.0 (beta)  
-**Target stable:** 1.0.0 after R1–R4 land and soak
+**Current version:** 0.13.0 (beta)  
+**Target stable:** 1.0.0 after R2–R4 land and soak
 
----"
+---
 
 ## Principles
 
@@ -216,8 +214,8 @@ calendar. Full `HijriDate` only if a concrete user demands civil Hijri I/O.
 
 | Version | Content | Exit criteria |
 |---------|---------|---------------|
-| 0.12.0 | current | done |
-| 0.13.0 | R1 holidays + business days | green CI + docs |
+| 0.12.0 | baseline | done |
+| 0.13.0 | R1 holidays + business days | **shipped** |
 | 0.14.0 | R2 vector | perf test + parity |
 | 0.15.0 | R3 interop | iso + fa parse |
 | 0.16.0 | R4 dim_date v2 | column dict + golden |

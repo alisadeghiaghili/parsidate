@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.13.0] - 2024-11-09
+
+### Added
+- `parsidate.holidays`: `HolidaySet`, official Iranian solar holidays,
+  curated lunar holidays for 1402–1404, `holidays_in_year` / `is_holiday`
+- `parsidate.operations.business`: `is_business_day`, `networkdays`,
+  `add_business_days`, `next_business_day`, `prev_business_day`
+- Default Jalali weekend = Friday; Gregorian = Sat/Sun
+- `docs/BUSINESS_CALENDAR.md`
+
+### Notes
+- Lunar holiday rows are published official Jalali dates (not astronomical
+  computation). Coverage years are documented in `holidays.ir`.
+- `add_business_days` follows Excel `WORKDAY` stepping semantics.
+
 ## [Unreleased]
 
 ### Added

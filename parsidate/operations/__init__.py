@@ -31,6 +31,13 @@ from .rounding import (
     floor_to_year, ceil_to_year,
     floor_date, ceiling_date, round_date,
 )
+from .business import (
+    is_business_day,
+    networkdays,
+    add_business_days,
+    next_business_day,
+    prev_business_day,
+)
 
 __all__ = [
     "add_months", "add_years",
@@ -49,4 +56,6 @@ __all__ = [
     "floor_to_quarter", "ceil_to_quarter",
     "floor_to_year", "ceil_to_year",
     "floor_date", "ceiling_date", "round_date",
+    "is_business_day", "networkdays", "add_business_days",
+    "next_business_day", "prev_business_day",
 ]
