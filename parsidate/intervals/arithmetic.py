@@ -1,111 +1,34 @@
-"""
-Calendar arithmetic operations for Jalali and Gregorian dates.
+"""Calendar arithmetic re-exported from :mod:`parsidate.operations.arithmetic`.
+
+This module exists only for backward compatibility. Canonical implementations
+live in ``parsidate.operations.arithmetic``.
 
 Copyright (C) 2024 Ali Sadeghi Aghili
 Licensed under GPL-3.0-or-later
 """
 
-from typing import Union
+from parsidate.operations.arithmetic import (
+    add_days,
+    add_months,
+    add_weeks,
+    add_years,
+    date_range,
+    diff_in_days,
+    next_month,
+    next_year,
+    prev_month,
+    prev_year,
+)
 
-
-def add_months(date, n: int) -> object:
-    """Add n months to date.
-
-    Args:
-        date: Date object.
-        n: Number of months to add.
-
-    Returns:
-        Date object (same type) after addition.
-    """
-    return date.add(months=n)
-
-
-def add_years(date, n: int) -> object:
-    """Add n years to date.
-
-    Args:
-        date: Date object.
-        n: Years to add.
-
-    Returns:
-        Date object (same type) after addition.
-    """
-    return date.add(years=n)
-
-
-def diff_in_days(date1, date2) -> int:
-    """Return difference in days between two dates (date1 - date2).
-
-    Args:
-        date1: First date object.
-        date2: Second date object.
-
-    Returns:
-        Integer number of days.
-    """
-    dur = date1 - date2
-    return dur.days() if hasattr(dur, "days") else int(dur)
-
-
-def next_month(date) -> object:
-    """Return next calendar month for date."""
-    return add_months(date, 1)
-
-
-def prev_month(date) -> object:
-    """Return previous calendar month for date."""
-    return add_months(date, -1)
-
-
-def next_year(date) -> object:
-    """Return next calendar year for date."""
-    return add_years(date, 1)
-
-
-def prev_year(date) -> object:
-    """Return previous calendar year for date."""
-    return add_years(date, -1)
-
-
-def add_days(date, n: int) -> object:
-    """Add n days to date.
-
-    Args:
-        date: Date object.
-        n: Days to add.
-
-    Returns:
-        Date object after addition.
-    """
-    return date.add(days=n)
-
-
-def add_weeks(date, n: int) -> object:
-    """Add n weeks to date.
-
-    Args:
-        date: Date object.
-        n: Weeks to add.
-
-    Returns:
-        Date object after addition.
-    """
-    return date.add(days=7 * n)
-
-
-def date_range(start, end, step_days: int = 1):
-    """Generate dates from start to end (inclusive) with step in days.
-
-    Args:
-        start: Start date object.
-        end: End date object.
-        step_days: Step in days.
-
-    Yields:
-        Date objects.
-    """
-    current = start.copy()
-    while current <= end:
-        yield current.copy()
-        current = current.add(days=step_days)
+__all__ = [
+    "add_days",
+    "add_months",
+    "add_weeks",
+    "add_years",
+    "date_range",
+    "diff_in_days",
+    "next_month",
+    "next_year",
+    "prev_month",
+    "prev_year",
+]
