@@ -2,7 +2,7 @@
 ParsiDate: Comprehensive Persian/Gregorian Date Toolkit for Python.
 """
 
-__version__ = "0.17.0"
+__version__ = "0.18.0"
 __author__ = "Ali Sadeghi Aghili"
 __email__ = "alisadeghiaghili@gmail.com"
 __license__ = "Apache-2.0"
@@ -33,7 +33,7 @@ from parsidate.operations.business import (
     next_business_day, prev_business_day,
 )
 from parsidate.holidays import (
-    HolidaySet, holidays_in_year, is_holiday, iran_holidays,
+    HolidaySet, HolidayCalendar, holidays_in_year, is_holiday, iran_holidays,
 )
 
 __all__ = [
@@ -53,5 +53,5 @@ __all__ = [
     "add_days", "add_months", "add_years",
     "is_business_day", "networkdays", "add_business_days",
     "next_business_day", "prev_business_day",
-    "HolidaySet", "holidays_in_year", "is_holiday", "iran_holidays",
+    "HolidaySet", "HolidayCalendar", "holidays_in_year", "is_holiday", "iran_holidays",
 ]

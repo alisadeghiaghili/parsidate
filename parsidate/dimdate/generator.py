@@ -105,9 +105,11 @@ def generate_dim_date(
         calendar: ``\"jalali\"`` or ``\"gregorian\"``.
         include_fiscal: Include fiscal_year/quarter/month columns.
         fiscal_year_start_month: Month when fiscal year starts (1-12).
-        holidays: ``HolidaySet``, iterable of dates, or list of date strings.
+        holidays: ``HolidayCalendar``, ``HolidaySet``, iterable of dates,
+            or list of date strings.
         weekend_days: Weekend weekday indices. Jalali default ``[6]`` (Friday);
             Gregorian default ``[5, 6]`` (Sat/Sun in Python numbering).
+            Ignored when ``holidays`` is a ``HolidayCalendar`` (uses its weekend).
         use_iran_holidays: Auto-load official Iranian holidays for Jalali
             years when ``holidays`` is not provided.
         as_of: Optional reference date for ``ytd_flag`` / ``mtd_flag``.
@@ -124,13 +126,26 @@ def generate_dim_date(
     from parsidate.core.jalali import JalaliDate
     from parsidate.core.gregorian import GregorianDate
     from parsidate.core.converters import jalali_to_gregorian, gregorian_to_jalali
-    from parsidate.holidays import HolidaySet, iran_holidays
+    from parsidate.holidays import HolidaySet, HolidayCalendar, iran_holidays
     from parsidate.operations.business import is_business_day
     from parsidate.parsers import jmd, ymd
     from parsidate.utils.helpers import (
         month_name, weekday_name, is_leap_year,
         days_in_month, get_season,
     )
+
+    # HolidayCalendar wins for weekend + holiday layers
+    if isinstance(holidays, HolidayCalendar):
+        weekend_days = list(holidays.weekend)
+        holiday_set = holidays.holidays
+        holiday_names = {}
+        for d in holiday_set:
+            name = holidays.holiday_name(d)
+            if name:
+                holiday_names[(d.year(), d.month(), d.day())] = name
+        use_iran_holidays = False
+    else:
+        holiday_names = {}
 
     if calendar == "jalali":
         start_date = jmd(start)
@@ -143,16 +158,18 @@ def generate_dim_date(
         if weekend_days is None:
             weekend_days = [5, 6]
 
-    # Normalize holidays to HolidaySet + optional name map
-    holiday_names = {}
-    if holidays is None and use_iran_holidays and calendar == "jalali":
+    # Normalize holidays to HolidaySet (HolidayCalendar already handled)
+    if isinstance(holidays, HolidayCalendar):
+        pass  # holiday_set and names already assigned
+    elif holidays is None and use_iran_holidays and calendar == "jalali":
         years = range(start_date.year(), end_date.year() + 1)
         acc = HolidaySet()
         for y in years:
             acc = acc | iran_holidays(y)
         holiday_set = acc
-        for d in holiday_set:
-            holiday_names[(d.year(), d.month(), d.day())] = "official"
+        holiday_names = {
+            (d.year(), d.month(), d.day()): "official" for d in holiday_set
+        }
     elif isinstance(holidays, HolidaySet):
         holiday_set = holidays
     elif holidays:
