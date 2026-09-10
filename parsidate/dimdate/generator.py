@@ -90,223 +90,201 @@ def generate_dim_date(
     start: str,
     end: str,
     calendar: Literal["jalali", "gregorian"] = "jalali",
-    include_fiscal: bool = False,
+    include_fiscal: bool = True,
     fiscal_year_start_month: int = 1,
-    holidays: Optional[List[str]] = None,
-    weekend_days: Optional[List[int]] = None
+    holidays=None,
+    weekend_days: Optional[List[int]] = None,
+    use_iran_holidays: bool = True,
+    as_of=None,
 ) -> pd.DataFrame:
-    """
-    Generate a complete date dimension table for data warehousing.
-
-    This function creates a comprehensive date dimension DataFrame suitable
-    for use in data warehouses, business intelligence, and analytics.
+    """Generate a warehouse-grade date dimension table.
 
     Args:
-        start: Start date string (e.g., "1400/01/01" or "2021-01-01")
-        end: End date string (e.g., "1400/12/29" or "2021-12-31")
-        calendar: Calendar system ("jalali" or "gregorian")
-        include_fiscal: Include fiscal year columns
-        fiscal_year_start_month: Month when fiscal year starts (1-12)
-        holidays: List of holiday date strings (optional)
-        weekend_days: List of weekend day numbers (0=Sat for Jalali, 0=Mon for Greg)
-                     Default: [6] (Friday) for Jalali, [5,6] (Sat/Sun) for Gregorian
+        start: Start date string (``1403/01/01`` or ``2024-01-01``).
+        end: End date string (inclusive).
+        calendar: ``\"jalali\"`` or ``\"gregorian\"``.
+        include_fiscal: Include fiscal_year/quarter/month columns.
+        fiscal_year_start_month: Month when fiscal year starts (1-12).
+        holidays: ``HolidaySet``, iterable of dates, or list of date strings.
+        weekend_days: Weekend weekday indices. Jalali default ``[6]`` (Friday);
+            Gregorian default ``[5, 6]`` (Sat/Sun in Python numbering).
+        use_iran_holidays: Auto-load official Iranian holidays for Jalali
+            years when ``holidays`` is not provided.
+        as_of: Optional reference date for ``ytd_flag`` / ``mtd_flag``.
 
     Returns:
-        pandas.DataFrame with comprehensive date dimension columns
+        ``pandas.DataFrame`` with one row per calendar day.
 
     Example:
         >>> from parsidate.dimdate import generate_dim_date
-        >>> dim = generate_dim_date(
-        ...     start="1400/01/01",
-        ...     end="1400/01/10",
-        ...     calendar="jalali",
-        ...     include_fiscal=True
-        ... )
-        >>> print(dim.head())
-        >>> dim.to_csv("dim_date.csv", index=False)
-
-    Columns:
-        - date_key: Integer key (YYYYMMDD format)
-        - full_date: Full date string
-        - year: Year number
-        - quarter: Quarter (1-4)
-        - month: Month number (1-12)
-        - day: Day of month
-        - month_name_en: Month name in English
-        - month_name_fa: Month name in Persian (Jalali only)
-        - month_short_en: Short month name (3 chars)
-        - weekday: Day of week (0-6)
-        - weekday_name_en: Weekday name in English
-        - weekday_name_fa: Weekday name in Persian (Jalali only)
-        - is_weekend: Boolean for weekend
-        - is_holiday: Boolean for holiday (if holidays provided)
-        - is_leap_year: Boolean for leap year
-        - day_of_year: Day number in year (1-365/366)
-        - week_of_year: Week number in year
-        - days_in_month: Number of days in the month
-        - season: Season name
-        - fiscal_year: Fiscal year (if include_fiscal=True)
-        - fiscal_quarter: Fiscal quarter (if include_fiscal=True)
-        - fiscal_month: Fiscal month number (if include_fiscal=True)
+        >>> dim = generate_dim_date("1403/01/01", "1403/01/07")
+        >>> bool(dim.loc[dim.date_key == 14030101, "is_holiday"].iloc[0])
+        True
     """
+    from parsidate.core.jalali import JalaliDate
+    from parsidate.core.gregorian import GregorianDate
+    from parsidate.core.converters import jalali_to_gregorian, gregorian_to_jalali
+    from parsidate.holidays import HolidaySet, iran_holidays
+    from parsidate.operations.business import is_business_day
     from parsidate.parsers import jmd, ymd
     from parsidate.utils.helpers import (
-        month_name, weekday_name, is_leap_year, 
-        days_in_month, get_season
+        month_name, weekday_name, is_leap_year,
+        days_in_month, get_season,
     )
 
-    # Parse start and end dates
     if calendar == "jalali":
         start_date = jmd(start)
         end_date = jmd(end)
         if weekend_days is None:
-            weekend_days = [6]  # Friday for Jalali
+            weekend_days = [6]
     else:
         start_date = ymd(start)
         end_date = ymd(end)
         if weekend_days is None:
-            weekend_days = [5, 6]  # Saturday and Sunday for Gregorian
+            weekend_days = [5, 6]
 
-    # Parse holidays if provided
-    holiday_set = set()
-    if holidays:
+    # Normalize holidays to HolidaySet + optional name map
+    holiday_names = {}
+    if holidays is None and use_iran_holidays and calendar == "jalali":
+        years = range(start_date.year(), end_date.year() + 1)
+        acc = HolidaySet()
+        for y in years:
+            acc = acc | iran_holidays(y)
+        holiday_set = acc
+        for d in holiday_set:
+            holiday_names[(d.year(), d.month(), d.day())] = "official"
+    elif isinstance(holidays, HolidaySet):
+        holiday_set = holidays
+    elif holidays:
+        parsed = []
         for h in holidays:
-            if calendar == "jalali":
-                h_date = jmd(h)
+            if isinstance(h, str):
+                parsed.append(jmd(h) if calendar == "jalali" else ymd(h))
             else:
-                h_date = ymd(h)
-            # Create key: YYYYMMDD
-            h_key = h_date.year() * 10000 + h_date.month() * 100 + h_date.day()
-            holiday_set.add(h_key)
+                parsed.append(h)
+        holiday_set = HolidaySet(dates=parsed)
+    else:
+        holiday_set = HolidaySet()
 
-    # Generate date range
-    dates_data = []
+    rows = []
     current = start_date.copy()
 
     while current <= end_date:
-        # Basic date components
-        year = current.year()
-        month = current.month()
-        day = current.day()
-
-        # Date key (YYYYMMDD format)
+        year, month, day = current.year(), current.month(), current.day()
         date_key = year * 10000 + month * 100 + day
+        weekday = current.weekday()
+        is_weekend = weekday in weekend_days
+        key3 = (year, month, day)
+        is_holiday = current in holiday_set
+        holiday_name = holiday_names.get(key3, "") if is_holiday else ""
 
-        # Standard strftime codes (Python strptime/strftime compatible)
+        if calendar == "jalali":
+            biz = is_business_day(
+                current,
+                weekend=weekend_days,
+                holidays=holiday_set if holiday_set else None,
+                use_iran_holidays=False,
+            )
+            gy, gm, gd = jalali_to_gregorian(year, month, day)
+            gdt = datetime(gy, gm, gd)
+            iso_y, iso_w, iso_d = gdt.isocalendar()
+            month_end_day = days_in_month(year, month, "jalali")
+        else:
+            biz = not is_weekend
+            gy, gm, gd = year, month, day
+            gdt = current.to_datetime()
+            iso_y, iso_w, iso_d = gdt.isocalendar()
+            month_end_day = days_in_month(year, month, "gregorian")
+
         full_date = current.strftime(
             "%Y/%m/%d" if calendar == "jalali" else "%Y-%m-%d", "en"
         )
+        month_start = f"{year:04d}/{month:02d}/01" if calendar == "jalali" else f"{year:04d}-{month:02d}-01"
+        month_end = (
+            f"{year:04d}/{month:02d}/{month_end_day:02d}"
+            if calendar == "jalali"
+            else f"{year:04d}-{month:02d}-{month_end_day:02d}"
+        )
 
-        # Quarter
-        quarter = current.quarter()
+        ytd_flag = False
+        mtd_flag = False
+        if as_of is not None:
+            ytd_flag = year == as_of.year() and (
+                (month, day) <= (as_of.month(), as_of.day())
+            )
+            mtd_flag = (
+                year == as_of.year()
+                and month == as_of.month()
+                and day <= as_of.day()
+            )
 
-        # Month names
-        month_name_en = month_name(month, "en", calendar)
-        month_short_en = month_name_en[:3]
-
-        # Weekday
-        weekday = current.weekday()
-        weekday_name_en = weekday_name(weekday, "en", calendar)
-
-        # Weekend check
-        is_weekend = weekday in weekend_days
-
-        # Holiday check
-        is_holiday = date_key in holiday_set
-
-        # Leap year
-        is_leap = is_leap_year(year, calendar)
-
-        # Day of year
-        day_of_year = current.day_of_year()
-
-        # Week of year (simple calculation)
-        week_of_year = (day_of_year - 1) // 7 + 1
-
-        # Days in month
-        days_in_this_month = days_in_month(year, month, calendar)
-
-        # Season
-        season = get_season(month, calendar)
-
-        # Build row dictionary
         row = {
             "date_key": date_key,
             "full_date": full_date,
             "year": year,
-            "quarter": quarter,
+            "quarter": current.quarter(),
             "month": month,
             "day": day,
-            "month_name_en": month_name_en,
-            "month_short_en": month_short_en,
+            "month_name_en": month_name(month, "en", calendar),
+            "month_short_en": month_name(month, "en", calendar)[:3],
             "weekday": weekday,
-            "weekday_name_en": weekday_name_en,
+            "weekday_name_en": weekday_name(weekday, "en", calendar),
             "is_weekend": is_weekend,
             "is_holiday": is_holiday,
-            "is_leap_year": is_leap,
-            "day_of_year": day_of_year,
-            "week_of_year": week_of_year,
-            "days_in_month": days_in_this_month,
-            "season": season,
+            "is_business_day": biz,
+            "holiday_name": holiday_name,
+            "iso_year": int(iso_y),
+            "iso_week": int(iso_w),
+            "iso_weekday": int(iso_d),
+            "month_start": month_start,
+            "month_end": month_end,
+            "is_leap_year": is_leap_year(year, calendar),
+            "day_of_year": current.day_of_year(),
+            "week_of_year": (current.day_of_year() - 1) // 7 + 1,
+            "days_in_month": month_end_day,
+            "season": get_season(month, calendar),
+            "ytd_flag": ytd_flag,
+            "mtd_flag": mtd_flag,
         }
 
-        # Add Persian names for Jalali calendar
         if calendar == "jalali":
             row["month_name_fa"] = month_name(month, "fa", calendar)
             row["weekday_name_fa"] = weekday_name(weekday, "fa", calendar)
 
-        # Fiscal year calculations
         if include_fiscal:
-            # Calculate fiscal year
             if month >= fiscal_year_start_month:
                 fiscal_year = year
             else:
                 fiscal_year = year - 1
-
-            # Calculate fiscal month (1-12 starting from fiscal_year_start_month)
             fiscal_month = ((month - fiscal_year_start_month) % 12) + 1
-
-            # Calculate fiscal quarter
-            fiscal_quarter = ((fiscal_month - 1) // 3) + 1
-
             row["fiscal_year"] = fiscal_year
-            row["fiscal_quarter"] = fiscal_quarter
+            row["fiscal_quarter"] = ((fiscal_month - 1) // 3) + 1
             row["fiscal_month"] = fiscal_month
 
-        dates_data.append(row)
-
-        # Move to next day
+        rows.append(row)
         current = current.add(days=1)
 
-    # Create DataFrame
-    df = pd.DataFrame(dates_data)
+    df = pd.DataFrame(rows)
 
-    # Reorder columns for better presentation
-    base_columns = [
+    cols = [
         "date_key", "full_date", "year", "quarter", "month", "day",
-        "month_name_en"
+        "month_name_en",
     ]
-
     if calendar == "jalali":
-        base_columns.append("month_name_fa")
-
-    base_columns.extend([
+        cols.append("month_name_fa")
+    cols += [
         "month_short_en",
-        "weekday", "weekday_name_en"
-    ])
-
+        "weekday", "weekday_name_en",
+    ]
     if calendar == "jalali":
-        base_columns.append("weekday_name_fa")
-
-    base_columns.extend([
-        "is_weekend", "is_holiday", "is_leap_year",
-        "day_of_year", "week_of_year", "days_in_month", "season"
-    ])
-
+        cols.append("weekday_name_fa")
+    cols += [
+        "is_weekend", "is_holiday", "is_business_day", "holiday_name",
+        "iso_year", "iso_week", "iso_weekday",
+        "month_start", "month_end",
+        "is_leap_year", "day_of_year", "week_of_year", "days_in_month",
+        "season", "ytd_flag", "mtd_flag",
+    ]
     if include_fiscal:
-        base_columns.extend(["fiscal_year", "fiscal_quarter", "fiscal_month"])
-
-    # Reorder DataFrame columns
-    df = df[base_columns]
-
-    return df
+        cols += ["fiscal_year", "fiscal_quarter", "fiscal_month"]
+    return df[cols]
