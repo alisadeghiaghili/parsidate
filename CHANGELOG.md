@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.12.0] - 2024-11-09
+
+### Added
+- `tzdata` dependency on Windows so `zoneinfo` works without OS tzdata
+- Hypothesis property tests for conversion round-trips (optional if hypothesis missing)
+- Year-length and month-span consistency tests for 1300-1500
+
+### Removed
+- Internal scratch docs `FINAL_REPORT.txt` and `FINAL_SETUP_GUIDE.txt`
+
 ## [0.11.0] - 2024-11-09
 
 ### Changed

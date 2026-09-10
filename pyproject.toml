@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parsidate"
-version = "0.11.0"
+version = "0.12.0"
 description = "Persian (Jalali/Solar Hijri) and Gregorian date toolkit for Python, inspired by R's lubridate"
 readme = "README.md"
 authors = [
@@ -32,7 +32,9 @@ classifiers = [
     "Topic :: Software Development :: Internationalization"
 ]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = [
+    "tzdata>=2024.1; sys_platform == 'win32'",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -42,6 +44,7 @@ dev = [
     "isort>=5.0",
     "mypy>=1.0",
     "flake8>=6.0",
+    "hypothesis>=6.0",
 ]
 dimdate = [
     "pandas>=1.5.0",
